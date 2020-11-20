@@ -23,6 +23,7 @@ demo.panel = function(config) {
 						items: [
 							{
 								xtype: extraExt.grid.xtype,
+								id:'demo-table-1',
 								name:'demo - snippet',
 								columns: [
 									{
@@ -123,6 +124,7 @@ demo.panel = function(config) {
 						},
 							{
 								xtype: 'grid',
+								id:'demo-table-2',
 								autoHeight: true,
 								columns: [ // Добавляем ширину и заголовок столбца
 									{
@@ -159,6 +161,16 @@ demo.panel = function(config) {
 										renderer: extraExt.grid.renderers.HTML
 									},
 									{
+										dataIndex: 'md',
+										header: 'MarkDown',
+										sortable: true,
+										width: 350,
+										extraExtRenderer:{
+											popup: true,
+										},
+										renderer: extraExt.grid.renderers.MD
+									},
+									{
 										dataIndex: 'bool',
 										header: 'bool',
 										sortable: true,
@@ -172,16 +184,31 @@ demo.panel = function(config) {
 
 								],
 								store: new Ext.data.ArrayStore({ // Объект ArrayStore
-									fields: ['int', 'text', 'json', 'html', 'bool', 'control'], // Поля, доступные в массиве данных
+									fields: ['int', 'text', 'json', 'html', 'bool', 'control','md'], // Поля, доступные в массиве данных
 									data: [ // Собственно, массив данных ([id, name])
-										[1, 'Pencil', '{"a":1}', '<div class="demo"></div>', 1, 'да'],
-										[2, 'Umbrella', '{"a":"text"}', '<div class="demo"></div>', false, 'нет'],
+										[1, 'Pencil', '{"a":1}', '<div class="demo"></div>', 1, 'да',`
+											# H1
+											## H2
+											### h3
+											
+										`],
+										[2, 'Umbrella', '{"a":"text"}', '<div class="demo"></div>', false, 'нет',`
+											# H1
+											## H2
+											### H3
+											
+										`],
 										[3, 'Ball', '[{"a":1},{"a":"text"}]', `
 <div class="demo">
 	<p>
 		<div></div>
 	</p>
-</div>`, '0', 'наверное'],
+</div>`, '0', 'наверное',`
+											# H1
+											## H2
+											### H3
+											
+										`],
 									]
 								}),
 							}

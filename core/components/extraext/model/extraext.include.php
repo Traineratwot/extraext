@@ -47,11 +47,12 @@
 				$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-css.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
 				$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-html.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
 				$devMode = (int)$this->devMode;
-				$this->addHtml("<script type='text/javascript' class='constants'>
+				$this->addHtml("<script type='text/javascript' class='extraExt-constants'>
 					const assetsUrl = `{$this->assets}`
 					const {$this->componentName}ConnectorUrl = `{$this->connectorUrl}`
 					const {$this->componentName}AssetsUrl = `{$this->componentUrl}`
-					const extraExtUrl = `{$this->extraExtUrl}` 
+					const extraExtUrl = `{$this->extraExtUrl}`
+					const componentName = `{$this->componentName}` 
 					const devMode = `{$devMode}`== '0'?false:true
 				</script>");
 				$this->addJavascript('js/main.js', $this->extraExtUrl);
