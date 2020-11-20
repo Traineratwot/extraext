@@ -4,6 +4,7 @@
 	{
 		public $componentName = '';
 		public $componentUrl = '';
+		public $connectorUrl = '';
 		private $cachePaths = [];
 		private $cachePathsGet = FALSE;
 		/**
@@ -103,7 +104,7 @@
 						$this->cachePaths = $this->cache->get('includes', [xPDO::OPT_CACHE_KEY => 'extraExt']);
 					}
 					if (is_array($this->cachePaths) and array_key_exists($hash, $this->cachePaths)) {
-						if(file_exists($this->cachePaths[$hash])) {
+						if (file_exists($this->cachePaths[$hash])) {
 							throw new Exception($this->cachePaths[$hash], 1);
 						}
 					}
@@ -135,6 +136,7 @@
 				$finalPath .= "?v=" . $v;
 			}
 			$this->head[$key][] = $finalPath;
+			return $finalPath;
 		}
 
 		/**
@@ -144,7 +146,7 @@
 		 */
 		public function addJavascript($script, $path = NULL, $cache = FALSE)
 		{
-			$this->addHead($script, $path, 'js', $cache);
+			return $this->addHead($script, $path, 'js', $cache);
 		}
 
 		/**
@@ -154,7 +156,7 @@
 		 */
 		public function addLastJavascript($script, $path = NULL, $cache = FALSE)
 		{
-			$this->addHead($script, $path, 'lastjs', $cache);
+			return $this->addHead($script, $path, 'lastjs', $cache);
 		}
 
 		/**
@@ -164,7 +166,7 @@
 		 */
 		public function addHtml($script, $path = NULL, $cache = FALSE)
 		{
-			$this->addHead($script, $path, 'html', $cache);
+			return $this->addHead($script, $path, 'html', $cache);
 		}
 
 		/**
@@ -174,7 +176,7 @@
 		 */
 		public function addCss($script, $path = NULL, $cache = FALSE)
 		{
-			$this->addHead($script, $path, 'css', $cache);
+			return $this->addHead($script, $path, 'css', $cache);
 
 		}
 
