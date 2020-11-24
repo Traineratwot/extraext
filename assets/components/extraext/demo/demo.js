@@ -4,7 +4,9 @@ Ext.onReady(function() {
 		xtype: 'demo-panel'
 	})
 })
-
+$(document).on('tabSwitch',function(c){
+	console.info(this,...arguments)
+})
 demo.panel = function(config) {
 	config = config || {}
 	Ext.apply(config, {
@@ -13,12 +15,13 @@ demo.panel = function(config) {
 			html: ' <h2>Demo table</h2>',
 		},
 			{
-				xtype: 'modx-tabs',
+				xtype: extraExt.tabs.xtype,
 				id: 'main-modx-tabs',
 				deferredRender: false,
 				border: true,
 				items: [
 					{
+						id:'tab1',
 						title: 'demo extraExt-grid',
 						items: [
 							{
@@ -68,18 +71,12 @@ demo.panel = function(config) {
 										dataIndex: 'description',
 										header: 'description',
 										sortable: true,
-										editor: {xtype: 'textarea'},
-										extraExtEditor:{
-											xtype:extraExt.inputs.modComboSuper.xtype,
-											action:'element/category/getlist',
-											fields:['id','name'],
-											displayField:'name',
-											valueField: 'id',
-										},
+										editor: {xtype: extraExt.inputs.ColorPicker.xtype},
+										extraExtEditor:{xtype: extraExt.inputs.ColorPicker.xtype},
 										extraExtRenderer:{
 											popup: true,
 										},
-										renderer: extraExt.grid.renderers.HTML
+										renderer: extraExt.grid.renderers.HEX
 
 									},
 									{
@@ -117,6 +114,7 @@ demo.panel = function(config) {
 							}]
 					},
 					{
+						id:'tab2',
 						title: 'demo',
 						items: [{
 							html: 'demo text',
@@ -223,8 +221,3 @@ demo.panel = function(config) {
 
 Ext.extend(demo.panel, MODx.Panel)
 Ext.reg('demo-panel', demo.panel)
-
-
-//# sourceMappingURL=demo.js.map
-
-//# sourceMappingURL=demo.js.map

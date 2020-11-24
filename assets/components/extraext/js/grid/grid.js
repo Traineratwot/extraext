@@ -11,6 +11,7 @@ extraExt.xTypes[extraExt.grid.xtype] = function(config) { // Придумыва�
 	var errorConfig = []
 	config = Object.assign({
 		id: Ext.id(),
+		extraEditor: extraExt.grid.editor.xtype,
 		extraExtSearch: false,
 		requestDataType: 'default',
 		searchKey: 'query',
@@ -61,7 +62,7 @@ extraExt.xTypes[extraExt.grid.xtype] = function(config) { // Придумыва�
 				cls: 'primary-button',
 				handler: () => {
 					MODx.load({
-						xtype: extraExt.grid.editor.xtype,
+						xtype: config.extraEditor,
 						title: _('extraExt.create') + ` ${config.name}`,
 						type: 'add',
 						table: this,
@@ -117,7 +118,7 @@ extraExt.xTypes[extraExt.grid.xtype] = function(config) { // Придумыва�
 			var row = this.getSelectionModel().getSelections()[0]
 			var data = row.data
 			MODx.load({
-				xtype: extraExt.grid.editor.xtype,
+				xtype: config.extraEditor,
 				title: _('extraExt.update') + ` ${data[self.nameField]}`,
 				updateData: data,
 				type: 'update',
@@ -197,7 +198,7 @@ extraExt.xTypes[extraExt.grid.xtype] = function(config) { // Придумыва�
 				}
 			}
 		}
-		this.addMenu(m)
+		m = this.addMenu.call(this, m, grid, rowIndex)
 		return m
 	}
 	if(config.extraExtUpdate || config.extraExtCreate) {
@@ -280,7 +281,8 @@ extraExt.xTypes[extraExt.grid.xtype] = function(config) { // Придумыва�
 		cs = cs.substr(1)
 		return cs
 	}
-	this.addMenu = function(m) {
+	this.addMenu = function(m, grid, rowIndex) {
+		return m
 	}
 	extraExt.xTypes[extraExt.grid.xtype].superclass.constructor.call(this, config) // Магия
 

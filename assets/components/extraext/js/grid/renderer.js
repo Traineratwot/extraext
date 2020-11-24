@@ -15,14 +15,15 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 	popUp(e) {
 		var data = extraExt.grid.renderers.eventData[e.dataset.eventdata]
 		var value = data.meta.rawValue
-
+		var config = data.config
 		value = this.bodyPrepare(data.meta.type, value, data.config.preRenderer, [data.th, data.rawValue, data.cell, data.row, data.x, data.y, data.table])
-
+		config.fn = this.popUpCallback
+		config.msg = value
+		config.title = data.th.header
+		data.elem = e
+		config.scope = data
 		e.setAttribute('data-active', true)
-		this.Window(data.th.header, value, this.popUpCallback, {
-			elem: e,
-			config: data,
-		})
+		this.Window(config)
 	}
 
 

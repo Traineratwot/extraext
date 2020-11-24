@@ -1,6 +1,3 @@
-extraExt.classes.util = {}
-extraExt.util = {}
-extraExt.util.renderer = {}
 extraExt.classes.util.renderers = class {
 	/**
 	 * @param {string} title
@@ -8,27 +5,23 @@ extraExt.classes.util.renderers = class {
 	 * @param {extraExt.classes.grid.renderers.popUpCallback} Callback
 	 * @param {{elem: *}} data
 	 */
-	Window(title, body, Callback = () => {}, data) {
-		data = Object.assign({
-			config: {
-				config: {}
-			}
-		}, data)
+	Window(config) {
 		var _tmp = Ext.id()
-		var msg = `<div class="extraExt_renderers_window" data-wrap="true">
-					<input id="${_tmp}" type="checkbox" checked onchange="document.querySelector('.extraExt_renderers_window_body').setAttribute('data-wrap',this.checked.toString())">
+		var wrap = extraExt.settings.get('extraExt.popup.wrap')
+		config.msg = `<div class="extraExt_renderers_window" data-wrap="${wrap ? 'true' : 'false'}" >
+					<input id="${_tmp}" type="checkbox"${wrap ? 'checked' : ''}  onchange="document.querySelector('.extraExt_renderers_window').setAttribute('data-wrap',this.checked.toString());extraExt.settings.set('extraExt.popup.wrap',this.checked)">
 					<label for="${_tmp}">${_('extraExt.enable.disable')} ${_('extraExt.wrap')}</label>
-					<pre class="extraExt_renderers_window_body">${body}</pre>
+					<pre class="extraExt_renderers_window_body" >${config.msg}</pre>
 			</div>`
 		Ext.MessageBox.show(Ext.apply({
-			title: title,
+			title: '',
+			msg: '',
 			resize: true,
-			msg: msg,
-			buttons: {yes: true},
-			fn: Callback,
-			scope: data,
+			width: window.innerWidth / 100 * 50,
+			height: window.innerHeight / 100 * 50,
+			buttons: {'yes': true},
 			icon: ''
-		}, data.config.config))
+		}, config))
 	}
 
 
@@ -45,53 +38,60 @@ extraExt.classes.util.renderers = class {
 				value = this.jsonBeautify(value)
 				try {
 					value = hljs.highlight('json', value).value
+					value = `<div class="hljs">${value}</div>`
 				} catch(e) {
-					value = `<pre><code class="language-json">${value}</code></pre>`
+					value = `<pre><code class="language-json hljs">${value}</code></pre>`
 				}
 				break
 			case 'HTML':
 				try {
 					value = html_beautify(value)
 					value = hljs.highlight('xml', value).value
+					value = `<div class="hljs">${value}</div>`
 				} catch(e) {
-					value = `<pre><code class="language-xml">${value}</code></pre>`
+					value = `<pre><code class="language-xml hljs">${value}</code></pre>`
 				}
 				break
 			case 'PHP':
 				try {
 					value = hljs.highlight('php', value).value
+					value = `<div class="hljs">${value}</div>`
 				} catch(e) {
-					value = `<pre><code class="language-php">${value}</code></pre>`
+					value = `<pre><code class="language-php hljs">${value}</code></pre>`
 				}
 				break
 			case 'JS':
 				try {
 					value = js_beautify(value)
 					value = hljs.highlight('js', value).value
+					value = `<div class="hljs">${value}</div>`
 				} catch(e) {
-					value = `<pre><code class="language-js">${value}</code></pre>`
+					value = `<pre><code class="language-js hljs">${value}</code></pre>`
 				}
 				break
 			case 'SQL':
 				try {
 					value = hljs.highlight('sql', value).value
+					value = `<div class="hljs">${value}</div>`
 				} catch(e) {
-					value = `<pre><code class="language-sql">${value}</code></pre>`
+					value = `<pre><code class="language-sql hljs">${value}</code></pre>`
 				}
 				break
 			case 'CSS':
 				try {
 					value = css_beautify(value)
 					value = hljs.highlight('css', value).value
+					value = `<div class="hljs">${value}</div>`
 				} catch(e) {
-					value = `<pre><code class="language-css">${value}</code></pre>`
+					value = `<pre><code class="language-css hljs">${value}</code></pre>`
 				}
 				break
 			case 'PYTHON':
 				try {
 					value = hljs.highlight('python', value).value
+					value = `<div class="hljs">${value}</div>`
 				} catch(e) {
-					value = `<pre><code class="language-python">${value}</code></pre>`
+					value = `<pre><code class="language-python hljs">${value}</code></pre>`
 				}
 				break
 			case 'MD':
@@ -117,12 +117,12 @@ extraExt.classes.util.renderers = class {
 	}
 
 
-	openPopup(title, value, type = false) {
-		value = this.bodyPrepare(type, value)
-		this.Window(title, value)
+	openPopup(config) {
+		config.msg = this.bodyPrepare(config.type || '', config.msg)
+		this.Window(config)
 	}
 }
 extraExt.util.renderer = new extraExt.classes.util.renderers
-//# sourceMappingURL=util.js.map
 
-//# sourceMappingURL=util.js.map
+
+

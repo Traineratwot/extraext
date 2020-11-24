@@ -5,16 +5,43 @@
  * @see extraExt.uniqueArray
  */
 Ext.onReady(function() {
-	setTimeout(() => {extraExt.hideColFromSettings()}, 500)
-
+	setTimeout(() => {
+		extraExt.hideColFromSettings()
+		extraExt.activeLastTab()
+	}, 50)
 })
 showdown.setFlavor('github')
 var extraExt = {
+	url: (new URL(document.location)),
 	xTypes: {},
 	classes: {
-		grid: {}
+		grid: {},
+		settings: {},
+		util: {
+			renderer: {}
+		}
 	},
-	grid: {},
+	grid: {
+		xtype: 'extraExt-grid',
+		editor: {
+			xtype: 'extraExt-grid-editor'
+		},
+		renderers: {},
+	},
+	window: {
+		xtype: 'extraExt-window'
+	},
+	inputs: {
+		modCombo: {
+			xtype: 'extraExt-modCombo'
+		},
+		modComboSuper: {
+			xtype: 'extraExt-modComboSuper'
+		}
+	},
+	tabs: {
+		xtype: 'extraExt-tabs'
+	},
 	bu: {},
 	requireConfigField: {},
 	mdConverter: new showdown.Converter({
@@ -22,9 +49,15 @@ var extraExt = {
 		tasklists: true,
 		smartIndentationFix: true,
 		openLinksInNewWindow: true,
+		parseImgDimensions: true,
+		simplifiedAutoLink: true,
+		strikethrough: true,
+		simpleLineBreaks: true,
+		omitExtraWLInCodeBlocks: true,
 		emoji: true,
 		// smoothPreview: '#wrap'
 	}),
+	util: {},
 	uniqueArray: (a) => {
 		try {
 			return [...new Set(a)]
@@ -69,33 +102,42 @@ var extraExt = {
 		try {
 			var t = extraExt.settings.get('extraExt.grids')
 			if(t) {
-				if(typeof componentName != 'undefined' && !extraExt.empty(componentName)) {
-					if(t.hasOwnProperty(componentName)) {
-						for(const tKey in t[componentName]) {
-							tVal = t[componentName][tKey]
-							if(tVal.hasOwnProperty('HiddenCol')) {
-								for(const HiddenColKey in tVal.HiddenCol) {
-									Ext.getCmp(tKey).getColumnModel().setHidden(HiddenColKey, tVal.HiddenCol[HiddenColKey])
-								}
-							}
-						}
-					}
-				} else {
-					for(const tKey in t) {
-						tVal = t[tKey]
-						if(tVal.hasOwnProperty('HiddenCol')) {
-							for(const HiddenColKey in tVal.HiddenCol) {
-								Ext.getCmp(tKey).getColumnModel().setHidden(HiddenColKey, tVal.HiddenCol[HiddenColKey])
-							}
+				for(const tKey in t) {
+					tVal = t[tKey]
+					if(tVal.hasOwnProperty('HiddenCol')) {
+						for(const HiddenColKey in tVal.HiddenCol) {
+							Ext.getCmp(tKey).getColumnModel().setHidden(HiddenColKey, tVal.HiddenCol[HiddenColKey])
 						}
 					}
 				}
 			}
+
 		} catch(e) {
 			if(devMode) {
 				console.warn(e)
 			}
 		}
+	},
+	activeLastTab: function() {
+		try {
+			var t = extraExt.settings.get('extraExt.activeTab')
+			if(t) {
+				for(const tKey in t) {
+					tVal = t[tKey]
+					Ext.getCmp(tKey).setActiveTab(tVal)
+				}
+			}
+
+		} catch(e) {
+			if(devMode) {
+				console.warn(e)
+			}
+		}
+	},
+	create: function(name, fn, extend) {
+		extraExt.xTypes[name] = fn
+		Ext.extend(extraExt.xTypes[name], extend) // Наша табличка расширяет GridPanel
+		Ext.reg(name, extraExt.xTypes[name]) // Регистрируем новый xtype
 	}
 }
 extraExt.classes.settings = class {
@@ -111,7 +153,10 @@ extraExt.classes.settings = class {
 
 	get(key) {
 		if(this.getAll()) {
-			return this.settings[key]
+			if(this.settings.hasOwnProperty(key)) {
+				return this.settings[key]
+			}
+			return null
 		}
 		return false
 	}
@@ -128,23 +173,34 @@ extraExt.classes.settings = class {
 
 
 	getLocalStorage(name) {
-		name = name.toString()
+		name = componentName + '.' + name.toString()
+		try {
+			this.size = new Blob(Object.values(localStorage[name])).size
+		} catch(e) {}
 		if(name) {
 			try {
-				return JSON.parse(localStorage[name])
-			} catch(e) {
 				if(typeof localStorage[name] != 'undefined') {
-					return localStorage[name]
+					var value = localStorage.getItem(name)
+					try {
+						return JSON.parse(value)
+					} catch(e) {
+						return value
+					}
 				} else {
 					return false
 				}
+			} catch(e) {
+				if(devMode) {
+					console.warn(e)
+				}
+				return false
 			}
 		}
 	}
 
 
 	setLocalStorage(name, value = {}) {
-		name = name.toString()
+		name = componentName + '.' + name.toString()
 		var store = this.getLocalStorage(name)
 		try {
 			if(value instanceof Object || value instanceof Array) {
@@ -153,51 +209,15 @@ extraExt.classes.settings = class {
 				}
 				value = JSON.stringify(value)
 			}
-
-			localStorage[name] = value
+			localStorage.setItem(name, value)
 			return true
 		} catch(e) {
-			return e
+			if(devMode) {
+				console.warn(e)
+			}
+			return false
 		}
 		return false
 	}
 }
 extraExt.settings = new extraExt.classes.settings()
-
-extraExt.bu.updateColumnHidden = Ext.grid.GridView.prototype.updateColumnHidden
-Ext.grid.GridView.prototype.updateColumnHidden = function(b, j) {
-	try {
-		var tableId = this.hmenu.id.replace('-hctx', '')
-		var settings = extraExt.settings.get('extraExt.grids') || {}
-		if(typeof componentName != 'undefined' && !extraExt.empty(componentName)) {
-			if(!settings.hasOwnProperty(componentName)) {
-				settings[componentName] = {}
-			}
-			if(!settings[componentName].hasOwnProperty(tableId)) {
-				settings[componentName][tableId] = {}
-			}
-			if(!settings[componentName][tableId].hasOwnProperty('HiddenCol')) {
-				settings[componentName][tableId].HiddenCol = {}
-			}
-			settings[componentName][tableId].HiddenCol[b.toString()] = j
-		} else {
-			if(!settings.hasOwnProperty(tableId)) {
-				settings[tableId] = {}
-			}
-			if(!settings[tableId].hasOwnProperty('HiddenCol')) {
-				settings[tableId].HiddenCol = {}
-			}
-			settings[tableId].HiddenCol[b.toString()] = j
-		}
-		extraExt.settings.set('extraExt.grids', settings)
-	} catch(e) {
-		if(devMode) {
-			console.warn(e)
-		}
-	}
-	extraExt.bu.updateColumnHidden.call(this, b, j)
-}
-
-//# sourceMappingURL=main.js.map
-
-//# sourceMappingURL=main.js.map

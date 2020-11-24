@@ -27,20 +27,23 @@
 		{
 			parent::__construct($modx, $config);
 			try {
+				$style = $this->modx->config['extraext_highlight_style'] ?: 'github';
 				$this->cache = $this->modx->getCacheManager();
 				$this->cachePaths = $this->cache->get('includes', [xPDO::OPT_CACHE_KEY => 'extraExt']);
 				$this->cachePathsGet = TRUE;
 				$this->assets = rtrim($modx->getOption('assets_url'), '/');
-				if ($this->componentName) {
-					$this->componentUrl = $this->assets . "/components/{$this->componentName}/";
-					$this->connectorUrl = $this->assets . "/components/{$this->componentName}/connector.php";
+				if (!$this->componentName) {
+					$this->componentName = $_GET['namespace'];
 				}
+				$this->componentUrl = $this->assets . "/components/{$this->componentName}/";
+				$this->connectorUrl = $this->assets . "/components/{$this->componentName}/connector.php";
 				$this->languageTopics = [
 					'extraext:default',
 				];
 				$this->extraExtUrl = $this->assets . "/components/extraext/";
-				$this->addCss('js/libs/highlight/styles/github.css', $this->extraExtUrl);
+				$this->addCss("js/libs/highlight/styles/{$style}.min.css", $this->extraExtUrl);
 				$this->addCss('css/main.tab.css', $this->extraExtUrl);
+				$this->addCss('css/colorpicker.css', $this->extraExtUrl);
 				$this->addJavascript('js/libs/highlight/highlight.pack.js', $this->extraExtUrl);
 				$this->addJavascript('js/libs/highlight/highlight.pack.js', $this->extraExtUrl);
 				$this->addJavascript('js/libs/showdown/dist/showdown.min.js', $this->extraExtUrl);
@@ -58,10 +61,14 @@
 				</script>");
 				$this->addJavascript('js/main.js', $this->extraExtUrl);
 				$this->addJavascript('js/util.js', $this->extraExtUrl);
-				$this->addJavascript('js/grid/renderer.js', $this->extraExtUrl);
-				$this->addJavascript('js/grid/grid.js', $this->extraExtUrl);
-				$this->addJavascript('js/grid/editor.js', $this->extraExtUrl);
-				$this->addJavascript('js/inputs.js', $this->extraExtUrl);
+				$this->addJavascript('js/inputs/combo.js', $this->extraExtUrl);
+				$this->addJavascript('js/inputs/colorpicker/colorpicker.js', $this->extraExtUrl);
+				$this->addJavascript('js/inputs/colorpicker/colorpickerfield.js', $this->extraExtUrl);
+				$this->addJavascript('js/widgets/window.js', $this->extraExtUrl);
+				$this->addJavascript('js/widgets/grid/renderer.js', $this->extraExtUrl);
+				$this->addJavascript('js/widgets/grid/grid.js', $this->extraExtUrl);
+				$this->addJavascript('js/widgets/grid/editor.js', $this->extraExtUrl);
+				$this->addJavascript('js/widgets/tab.js', $this->extraExtUrl);
 			} catch (Exception $e) {
 				$this->modx->log(modX::LOG_LEVEL_ERROR, $e->getMessage(), '', __METHOD__ ?: __FUNCTION__, __FILE__, __LINE__);
 			}
@@ -86,6 +93,10 @@
 		 */
 		public function addHead($script, $path = NULL, $key, $cache = FALSE)
 		{
+			$_args = func_get_args();
+			if (count($_args) == 1 and is_array($_args[0])) {
+				extract($_args[0], '');
+			}
 			$finalPath = '';
 			if (!is_null($path)) {
 				$finalPath = rtrim($path, '/') . '/' . ltrim($script, '/');
@@ -131,7 +142,9 @@
 			}
 			if ($this->devMode and !$remote and in_array($key, ['js', 'lastjs', 'css'])) {
 				$absolutPath = ltrim($finalPath, $this->assets);
-				$v = md5_file(MODX_ASSETS_PATH . $absolutPath);
+				if (file_exists(MODX_ASSETS_PATH . $absolutPath)) {
+					$v = @md5_file(MODX_ASSETS_PATH . $absolutPath);
+				}
 				$v = $v ?: time();
 				$finalPath .= "?v=" . $v;
 			}
@@ -146,6 +159,10 @@
 		 */
 		public function addJavascript($script, $path = NULL, $cache = FALSE)
 		{
+			$_args = func_get_args();
+			if (count($_args) == 1 and is_object($_args[0])) {
+				extract($_args[0], '');
+			}
 			return $this->addHead($script, $path, 'js', $cache);
 		}
 
@@ -156,6 +173,10 @@
 		 */
 		public function addLastJavascript($script, $path = NULL, $cache = FALSE)
 		{
+			$_args = func_get_args();
+			if (count($_args) == 1 and is_object($_args[0])) {
+				extract($_args[0], '');
+			}
 			return $this->addHead($script, $path, 'lastjs', $cache);
 		}
 
@@ -166,6 +187,10 @@
 		 */
 		public function addHtml($script, $path = NULL, $cache = FALSE)
 		{
+			$_args = func_get_args();
+			if (count($_args) == 1 and is_array($_args[0])) {
+				extract($_args[0], '');
+			}
 			return $this->addHead($script, $path, 'html', $cache);
 		}
 
@@ -176,6 +201,10 @@
 		 */
 		public function addCss($script, $path = NULL, $cache = FALSE)
 		{
+			$_args = func_get_args();
+			if (count($_args) == 1 and is_object($_args[0])) {
+				extract($_args[0], '');
+			}
 			return $this->addHead($script, $path, 'css', $cache);
 
 		}
