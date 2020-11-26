@@ -95,7 +95,7 @@
 		{
 			$_args = func_get_args();
 			if (count($_args) == 1 and is_array($_args[0])) {
-				extract($_args[0], '');
+				extract($_args[0], EXTR_OVERWRITE);
 			}
 			$finalPath = '';
 			if (!is_null($path)) {
@@ -161,7 +161,7 @@
 		{
 			$_args = func_get_args();
 			if (count($_args) == 1 and is_object($_args[0])) {
-				extract($_args[0], '');
+				extract($_args[0], EXTR_OVERWRITE);
 			}
 			return $this->addHead($script, $path, 'js', $cache);
 		}
@@ -175,7 +175,7 @@
 		{
 			$_args = func_get_args();
 			if (count($_args) == 1 and is_object($_args[0])) {
-				extract($_args[0], '');
+				extract($_args[0], EXTR_OVERWRITE);
 			}
 			return $this->addHead($script, $path, 'lastjs', $cache);
 		}
@@ -189,7 +189,7 @@
 		{
 			$_args = func_get_args();
 			if (count($_args) == 1 and is_array($_args[0])) {
-				extract($_args[0], '');
+				extract($_args[0], EXTR_OVERWRITE);
 			}
 			return $this->addHead($script, $path, 'html', $cache);
 		}
@@ -203,7 +203,7 @@
 		{
 			$_args = func_get_args();
 			if (count($_args) == 1 and is_object($_args[0])) {
-				extract($_args[0], '');
+				extract($_args[0], EXTR_OVERWRITE);
 			}
 			return $this->addHead($script, $path, 'css', $cache);
 

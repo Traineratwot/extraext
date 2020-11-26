@@ -7,12 +7,12 @@ extraExt.create(
 	extraExt.grid.editor.xtype,
 	function(config) {
 		config = config || {}
-		var requireConfigField = extraExt.requireConfigField[extraExt.grid.editor.xtype].slice()
+		var requireConfigField = extraExt.requireConfigField[extraExt.grid.editor.xtype].slice() //копирование массива с обязательными полями
 		var errorConfig = []
 		var warnConfig = []
-		var table = config.table
-		var row = config.row
-		var type = config.type || 'add'
+		var table = config.table //объект с таблицей
+		var row = config.row //объект со строкой
+		var type = config.type || 'add'//тип add - создать новую строку, edit - редактировать
 		var ident = `extraExt-grid-editor_${type}_${Ext.id()}`
 		var _updateData = {}
 		config.url = table.url
@@ -128,11 +128,12 @@ extraExt.create(
 		Ext.applyIf(config, {
 			title: `${_('extraExt.create')} `,
 			closeAction: 'close',
-			requestDataType: 'default',
+			requestDataType: 'form',
 			id: ident,
 			saveBtnText: _('extraExt.save'),
 			width: (window.innerWidth / 100) * 50,
 		})
+		//проверка наличия обязательны
 		for(const key of requireConfigField) {
 			if(config.hasOwnProperty(key)) {
 				if(extraExt.empty(config[key])) {

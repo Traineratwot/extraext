@@ -14,7 +14,7 @@ extraExt.create(
 			id: Ext.id(),
 			extraEditor: extraExt.grid.editor.xtype,
 			extraExtSearch: false,
-			requestDataType: 'default',
+			requestDataType: 'form',
 			searchKey: 'query',
 			tbar: [],
 			columns: [

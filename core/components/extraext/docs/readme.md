@@ -68,4 +68,7 @@
 ```
 Список зарегистрированных xtype'oв `extraExt.xTypes`
 
-
+[подробнее о Grid](https://github.com/Traineratwot/extraext/wiki/Grid)
+[подробнее о renderer](https://github.com/Traineratwot/extraext/wiki/Grid)
+[подробнее о editor](https://github.com/Traineratwot/extraext/wiki/editor)
+[подробнее о tab](https://github.com/Traineratwot/extraext/wiki/tab)

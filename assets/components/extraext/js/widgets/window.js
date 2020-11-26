@@ -13,7 +13,7 @@ extraExt.create(
 		Object.assign({}, config)
 		Ext.applyIf(config, {
 			closeAction: 'close',
-			requestDataType: 'default',
+			requestDataType: 'form',
 			saveBtnText: _('extraExt.save'),
 			width: (window.innerWidth / 100) * 50,
 		})

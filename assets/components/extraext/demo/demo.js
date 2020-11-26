@@ -107,7 +107,7 @@ demo.panel = function(config) {
 								autosave: true,
 								sortBy: 'id',
 								sortDir:'desc',
-								requestDataType: 'default',
+								requestDataType: 'form',
 								fields: ['id', 'name','description', 'content', 'category'],
 								// url: MODx.config.connector_url, //по умолчанию
 								action: 'element/snippet/getlist',
