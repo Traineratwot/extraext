@@ -9,6 +9,9 @@ Ext.onReady(function() {
 		extraExt.hideColFromSettings()
 		extraExt.activeLastTab()
 	}, 50)
+	try {
+		window['extraExt-copyright-img'].src = extraExtUrl+'media/extraExt.long.png'
+	}catch (e) {}
 })
 showdown.setFlavor('github')
 var extraExt = {
@@ -26,6 +29,21 @@ var extraExt = {
 		editor: {
 			xtype: 'extraExt-grid-editor'
 		},
+		/**
+		 * @author Traineratwot
+		 * @see default
+		 * @see HTML
+		 * @see PHP
+		 * @see JS
+		 * @see SQL
+		 * @see CSS
+		 * @see PYTHON
+		 * @see JSON
+		 * @see BOOL
+		 * @see CHECKBOX
+		 * @see RADIO
+		 * @see HEX
+		 */
 		renderers: {},
 	},
 	window: {
@@ -37,6 +55,10 @@ var extraExt = {
 		},
 		modComboSuper: {
 			xtype: 'extraExt-modComboSuper'
+		}
+		,
+		search: {
+			xtype: 'extraExt-search'
 		}
 	},
 	tabs: {
@@ -134,9 +156,9 @@ var extraExt = {
 			}
 		}
 	},
-	create: function(name, fn, extend) {
+	create: function(name, fn, extend, options = [{}]) {
 		extraExt.xTypes[name] = fn
-		Ext.extend(extraExt.xTypes[name], extend) // Наша табличка расширяет GridPanel
+		Ext.extend(extraExt.xTypes[name], extend, ...options) // Наша табличка расширяет GridPanel
 		Ext.reg(name, extraExt.xTypes[name]) // Регистрируем новый xtype
 	}
 }

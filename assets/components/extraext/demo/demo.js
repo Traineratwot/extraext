@@ -152,7 +152,6 @@ demo.panel = function(config) {
 										dataIndex: 'html',
 										header: 'html',
 										sortable: true,
-										width: 350,
 										extraExtRenderer:{
 											popup: true,
 										},
@@ -162,7 +161,6 @@ demo.panel = function(config) {
 										dataIndex: 'md',
 										header: 'MarkDown',
 										sortable: true,
-										width: 350,
 										extraExtRenderer:{
 											popup: true,
 										},
@@ -175,27 +173,32 @@ demo.panel = function(config) {
 										renderer: extraExt.grid.renderers.BOOL
 									},
 									{
-										dataIndex: 'control',
-										header: 'control',
+										dataIndex: 'radio',
+										header: 'radio',
 										renderer: extraExt.grid.renderers.RADIO,
+									},
+									{
+										dataIndex: 'HEX',
+										header: 'HEX',
+										renderer: extraExt.grid.renderers.HEX,
 									},
 
 								],
 								store: new Ext.data.ArrayStore({ // Объект ArrayStore
-									fields: ['int', 'text', 'json', 'html', 'bool', 'control','md'], // Поля, доступные в массиве данных
+									fields: ['int', 'text', 'json', 'html', 'bool', 'radio','md','HEX'], // Поля, доступные в массиве данных
 									data: [ // Собственно, массив данных ([id, name])
 										[1, 'Pencil', '{"a":1}', '<div class="demo"></div>', 1, 'да',`
 											# H1
 											## H2
 											### h3
 											
-										`],
+										`,'#ffffff'],
 										[2, 'Umbrella', '{"a":"text"}', '<div class="demo"></div>', false, 'нет',`
 											# H1
 											## H2
 											### H3
 											
-										`],
+										`,'#000000'],
 										[3, 'Ball', '[{"a":1},{"a":"text"}]', `
 <div class="demo">
 	<p>
@@ -206,7 +209,7 @@ demo.panel = function(config) {
 											## H2
 											### H3
 											
-										`],
+										`,'#ff0055'],
 									]
 								}),
 							}

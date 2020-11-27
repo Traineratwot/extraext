@@ -1,12 +1,20 @@
 extraExt.create(
 	extraExt.tabs.xtype,
 	function(config) {
+		if(config.hasOwnProperty('items') && config.items.length > 0) {
+			for(const itemsKey in config.items) {
+				if(!config.items[itemsKey].hasOwnProperty('layout') && !config.items[itemsKey].hasOwnProperty('xtype')) {
+					config.items[itemsKey].layout = 'anchor'
+				}
+
+			}
+		}
 		extraExt.xTypes[extraExt.tabs.xtype].superclass.constructor.call(this, config)
 		this._onTabSwitch = function(c) {
 			try {
 				if(c.hidden == true) {
 					var activeTab = extraExt.settings.get('extraExt.activeTab')
-					if(typeof activeTab == 'undefined' || typeof activeTab != 'object') {
+					if(typeof activeTab == 'undefined' || !activeTab instanceof Object || !activeTab) {
 						activeTab = {}
 					}
 					activeTab[this.getId()] = c.getId()
@@ -21,7 +29,6 @@ extraExt.create(
 	},
 	MODx.Tabs
 )
-
 extraExt.bu.onStripMouseDown = MODx.Tabs.prototype.onStripMouseDown
 MODx.Tabs.prototype.onStripMouseDown = function(b) {
 	try {
@@ -38,8 +45,8 @@ MODx.Tabs.prototype.onStripMouseDown = function(b) {
 			}
 			var tabSwitch = new CustomEvent('tabSwitch', {
 				detail: {
-					tab:this.getId(),
-					active:c.getId(),
+					tab: this.getId(),
+					active: c.getId(),
 					data: c,
 					title: c.title
 				},

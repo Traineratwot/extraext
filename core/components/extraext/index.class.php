@@ -16,7 +16,6 @@
 				return 'DEMO';
 			}
 
-
 			public function loadCustomCssJs()
 			{
 

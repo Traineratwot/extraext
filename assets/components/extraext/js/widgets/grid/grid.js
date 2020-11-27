@@ -2,7 +2,6 @@ extraExt.requireConfigField[extraExt.grid.xtype] = [
 	'action',
 	'url',
 	'fields',
-	'columns',
 ]
 extraExt.create(
 	extraExt.grid.xtype,
@@ -17,6 +16,8 @@ extraExt.create(
 			requestDataType: 'form',
 			searchKey: 'query',
 			tbar: [],
+			leftTbar: [],
+			rightTbar: [],
 			columns: [
 				{
 					dataIndex: 'id',
@@ -34,7 +35,7 @@ extraExt.create(
 			paging: true,
 			autoHeight: true,
 			autoSize: true,
-			anchor: '95%',
+			anchor: '100%',
 			autoExpandColumn: 'content',
 			viewConfig: {
 				forceFit: true,
@@ -56,70 +57,48 @@ extraExt.create(
 		}, config)
 		//add actions
 		if(config.extraExtCreate && config.create_action) {
-			config.tbar.unshift(
+			if(!config.hasOwnProperty('createBtnText')) {
+				config.createBtnText = _('create') + ' ' + config.name
+			}
+			config.leftTbar.unshift(
 				{
 					xtype: 'button', // Перемещаем сюда нашу кнопку
-					text: _('extraExt.create'),
-					cls: 'primary-button',
-					handler: () => {
-						MODx.load({
-							xtype: config.extraEditor,
-							title: _('extraExt.create') + ` ${config.name}`,
-							type: 'add',
-							table: this,
-						}).show()
-					},
+					text: '<i class="icon icon-plus"></i>&nbsp;' + config.createBtnText,
+					handler: this.ExtraExtCreate,
+					scope: this,
 				}
 			)
 		}
 		if(config.extraExtSearch && config.searchKey) {
-			config.extraExtSearchFn = function(tf, nv, ov) {
-
-				var s = this.getStore()
-				var val = tf.getValue()
-				if(val) {
-					s.baseParams[this.searchKey] = tf.getValue()
-				} else {
-					s.baseParams[this.searchKey] = null
-					delete s.baseParams[this.searchKey]
-				}
-				this.getBottomToolbar().changePage(1)
-				this.refresh()
-			}
-			config.tbar.push(
+			config.rightTbar.unshift(
 				{
-					xtype: 'textfield',
-					emptyText: _('extraExt.search'),
+					xtype: extraExt.inputs.search.xtype,
+					width: '150',
+					name: this.searchKey,
 					listeners: {
-						'change': {
-							fn: function() {this.extraExtSearchFn.call(this, ...arguments)},
-							scope: this
-						},
-						'render': {
-							fn: function(cmp) {
-								new Ext.KeyMap(cmp.getEl(), {
-									key: Ext.EventObject.ENTER
-									, fn: function() {
-										this.fireEvent('change', this)
-										this.blur()
-										return true
-									}
-									, scope: cmp
-								})
+						search: {
+							fn: function(field) {
+								this.extraExtSearchFn.call(this, ...arguments)
 							}, scope: this
-						}
+						},
+						clear: {
+							fn: function(field) {
+								field.setValue('')
+								this.extraExtClearSearch()
+							}, scope: this
+						},
 					}
 				}
 			)
 		}
 		if(config.extraExtUpdate && config.save_action) {
-			config.extraExtUpdateFn = function() {
+			this.extraExtUpdateFn = function() {
 				var cs = this.getSelectedPrimaryKey()
 				var self = this
 				var row = this.getSelectionModel().getSelections()[0]
 				var data = row.data
 				MODx.load({
-					xtype: config.extraEditor,
+					xtype: this.extraEditor,
 					title: _('extraExt.update') + ` ${data[self.nameField]}`,
 					updateData: data,
 					type: 'update',
@@ -137,7 +116,7 @@ extraExt.create(
 			}
 		}
 		if(config.extraExtDelete && config.delete_action) {
-			config.extraExtDeleteFn = function() {
+			this.extraExtDeleteFn = function() {
 				var cs = this.getSelectedAsList()
 				var self = this
 				var url = this.url
@@ -190,7 +169,7 @@ extraExt.create(
 				}
 			}
 		}
-		config.getMenu = function(grid, rowIndex) {
+		this.getMenu = function(grid, rowIndex) {
 			var m = []
 			for(const menu in config.extraExtMenus) {
 				if(config.extraExtMenus.hasOwnProperty(menu)) {
@@ -202,26 +181,28 @@ extraExt.create(
 			m = this.addMenu.call(this, m, grid, rowIndex)
 			return m
 		}
-		if(config.extraExtUpdate || config.extraExtCreate) {
+		if(this.extraExtUpdate || this.extraExtCreate) {
 			requireConfigField.push('nameField')
 			requireConfigField.push('keyField')
 		}
+		config.tbar = this.getTopBar(config)
+		extraExt.xTypes[extraExt.grid.xtype].superclass.constructor.call(this, config) // Магия
 		//validator
-		if(config.extraExtSearch) {
+		if(this.extraExtSearch) {
 			requireConfigField.push('searchKey')
 		}
-		if(config.extraExtUpdate) {
+		if(this.extraExtUpdate) {
 			requireConfigField.push('save_action')
 		}
-		if(config.extraExtCreate) {
+		if(this.extraExtCreate) {
 			requireConfigField.push('create_action')
 		}
-		if(config.extraExtDelete) {
+		if(this.extraExtDelete) {
 			requireConfigField.push('delete_action')
 		}
 		for(const key of requireConfigField) {
-			if(config.hasOwnProperty(key)) {
-				if(extraExt.empty(config[key])) {
+			if(this.hasOwnProperty(key)) {
+				if(extraExt.empty(this[key])) {
 					errorConfig.push(key)
 				}
 			} else {
@@ -230,12 +211,16 @@ extraExt.create(
 
 		}
 		if(errorConfig.length > 0) {
-			console.error(`ExtraExt: invalid require config [${this.xtype || config.xtype}]`, errorConfig)
-			return false
+			console.warn(`ExtraExt: invalid require this [${this.xtype || this.xtype}]`, errorConfig)
+			//return false
 		}
-		//функции
-		this.saveRecord = function(e) {
-
+	},
+	MODx.grid.Grid,
+	[{
+		leftTbar: [],
+		rightTbar: [],
+		extraExtMenus: [],
+		saveRecord: function(e) {
 			e.record.data.menu = null
 			var p = this.config.saveParams || {}
 			Ext.apply(e.record.data, p)
@@ -271,8 +256,8 @@ extraExt.create(
 					}
 				}
 			})
-		}
-		this.getSelectedPrimaryKey = function() {
+		},
+		getSelectedPrimaryKey: function() {
 			var selects = this.getSelectionModel().getSelections()
 			if(selects.length <= 0) return false
 			var cs = ''
@@ -281,14 +266,42 @@ extraExt.create(
 			}
 			cs = cs.substr(1)
 			return cs
-		}
-		this.addMenu = function(m, grid, rowIndex) {
+		},
+		addMenu: function(m, grid, rowIndex) {
 			return m
-		}
-		extraExt.xTypes[extraExt.grid.xtype].superclass.constructor.call(this, config) // Магия
-
-	},
-	MODx.grid.Grid
+		},
+		getTopBar: function(config) {
+			var tbar = []
+			for(const leftTbarKey in config.leftTbar) {
+				if(config.leftTbar.hasOwnProperty(leftTbarKey)) {
+					tbar.push(config.leftTbar[leftTbarKey])
+				}
+			}
+			tbar.push('->')
+			for(const rightTbarKey in config.rightTbar) {
+				if(config.rightTbar.hasOwnProperty(rightTbarKey)) {
+					tbar.push(config.rightTbar[rightTbarKey])
+				}
+			}
+			return tbar
+		},
+		extraExtSearchFn: function(tf) {
+			this.getStore().baseParams.query = tf.getValue()
+			this.getBottomToolbar().changePage(1)
+		},
+		extraExtClearSearch: function() {
+			this.getStore().baseParams.query = ''
+			this.getBottomToolbar().changePage(1)
+		},
+		ExtraExtCreate: function() {
+			MODx.load({
+				xtype: this.extraEditor,
+				title: _('extraExt.create') + ` ${this.name}`,
+				type: 'add',
+				table: this,
+			}).show()
+		},
+	}]
 )
 
 extraExt.bu.updateColumnHidden = Ext.grid.GridView.prototype.updateColumnHidden

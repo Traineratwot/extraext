@@ -31,16 +31,17 @@
 				$this->cache = $this->modx->getCacheManager();
 				$this->cachePaths = $this->cache->get('includes', [xPDO::OPT_CACHE_KEY => 'extraExt']);
 				$this->cachePathsGet = TRUE;
-				$this->assets = rtrim($modx->getOption('assets_url'), '/');
+				$this->assets = rtrim($modx->getOption('assets_url',null,'/assets'), '/') . '/';
+				$this->copyright = (bool)$modx->getOption('extraext_copyright', null, TRUE);
 				if (!$this->componentName) {
 					$this->componentName = $_GET['namespace'];
 				}
-				$this->componentUrl = $this->assets . "/components/{$this->componentName}/";
-				$this->connectorUrl = $this->assets . "/components/{$this->componentName}/connector.php";
+				$this->componentUrl = $this->assets . "components/{$this->componentName}/";
+				$this->connectorUrl = $this->assets . "components/{$this->componentName}/connector.php";
 				$this->languageTopics = [
 					'extraext:default',
 				];
-				$this->extraExtUrl = $this->assets . "/components/extraext/";
+				$this->extraExtUrl = $this->assets . "components/extraext/";
 				$this->addCss("js/libs/highlight/styles/{$style}.min.css", $this->extraExtUrl);
 				$this->addCss('css/main.tab.css', $this->extraExtUrl);
 				$this->addCss('css/colorpicker.css', $this->extraExtUrl);
@@ -69,6 +70,9 @@
 				$this->addJavascript('js/widgets/grid/grid.js', $this->extraExtUrl);
 				$this->addJavascript('js/widgets/grid/editor.js', $this->extraExtUrl);
 				$this->addJavascript('js/widgets/tab.js', $this->extraExtUrl);
+				if ($this->copyright == TRUE) {
+					$this->addHtml($this->_download(MODX_ASSETS_PATH . 'components/extraext/copyright.tpl'));
+				}
 			} catch (Exception $e) {
 				$this->modx->log(modX::LOG_LEVEL_ERROR, $e->getMessage(), '', __METHOD__ ?: __FUNCTION__, __FILE__, __LINE__);
 			}
@@ -231,9 +235,11 @@
 					'timeout' => $timeout,
 				],
 			];
-			if (!file_exists(dirname($outPath)) or !is_dir(dirname($outPath))) {
-				if (!mkdir($concurrentDirectory = dirname($outPath), $permissions, TRUE) && !is_dir($concurrentDirectory)) {
-					throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+			if ($outPath) {
+				if (!file_exists(dirname($outPath)) or !is_dir(dirname($outPath))) {
+					if (!mkdir($concurrentDirectory = dirname($outPath), $permissions, TRUE) && !is_dir($concurrentDirectory)) {
+						throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
+					}
 				}
 			}
 			if (version_compare(PHP_VERSION, '7.1.0', '>=')) {

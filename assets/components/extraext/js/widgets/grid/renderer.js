@@ -460,6 +460,7 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
  * @see BOOL
  * @see CHECKBOX
  * @see RADIO
+ * @see HEX
  */
 extraExt.grid.renderers = new extraExt.classes.grid.renderers()
 
