@@ -26,16 +26,16 @@ extraExt.create(
 					renderer: extraExt.grid.renderers.default
 				},
 			],
+			paging: true,
 			fields: ['id'],
 			url: MODx.config.connector_url,
 			action: 'resource/getlist',
 			save_action: '',
 			create_action: '',
 			delete_action: '',
-			paging: true,
 			autoHeight: true,
 			autoSize: true,
-			anchor: '100%',
+			anchor: '99%',
 			autoExpandColumn: 'content',
 			viewConfig: {
 				forceFit: true,
@@ -63,7 +63,7 @@ extraExt.create(
 			config.leftTbar.unshift(
 				{
 					xtype: 'button', // Перемещаем сюда нашу кнопку
-					text: '<i class="icon icon-plus"></i>&nbsp;' + config.createBtnText,
+					text: '<i class="fas fa-plus"></i>&nbsp;' + config.createBtnText,
 					handler: this.ExtraExtCreate,
 					scope: this,
 				}
@@ -108,6 +108,7 @@ extraExt.create(
 			}
 			config.extraExtMenus.update = (grid, rowIndex) => {
 				return {
+					icon: '<i class="fad fa-edit"></i>',
 					text: _('extraExt.update'),
 					grid: grid,
 					rowIndex: rowIndex,
@@ -162,6 +163,7 @@ extraExt.create(
 			}
 			config.extraExtMenus.delete = (grid, rowIndex) => {
 				return {
+					icon: '<i class="fas fa-minus"></i>',
 					text: _('delete'),
 					grid: grid,
 					rowIndex: rowIndex,
@@ -185,8 +187,13 @@ extraExt.create(
 			requireConfigField.push('nameField')
 			requireConfigField.push('keyField')
 		}
-		config.tbar = this.getTopBar(config)
+		config.tbar = this.getTopBar.call(this, config)
+		config.bbar = this.getBotBar.call(this, config)
+		if(config.hasOwnProperty('baseParams')) {
+			delete config.baseParams
+		}
 		extraExt.xTypes[extraExt.grid.xtype].superclass.constructor.call(this, config) // Магия
+		Object.assign(this.getStore().baseParams, config.base_params)
 		//validator
 		if(this.extraExtSearch) {
 			requireConfigField.push('searchKey')
@@ -211,15 +218,22 @@ extraExt.create(
 
 		}
 		if(errorConfig.length > 0) {
-			console.warn(`ExtraExt: invalid require this [${this.xtype || this.xtype}]`, errorConfig)
+			if(devMode) {
+				console.warn(`ExtraExt: invalid require this [${this.xtype || this.xtype}]`, errorConfig)
+			}
 			//return false
+		}
+		this.getId = function() {
+			return this.id || config.id
 		}
 	},
 	MODx.grid.Grid,
 	[{
 		leftTbar: [],
 		rightTbar: [],
-		extraExtMenus: [],
+		rightBbar: [],
+		leftBbar: [],
+		extraExtMenus: {},
 		saveRecord: function(e) {
 			e.record.data.menu = null
 			var p = this.config.saveParams || {}
@@ -271,7 +285,7 @@ extraExt.create(
 			return m
 		},
 		getTopBar: function(config) {
-			var tbar = []
+			var tbar = config.tbar || []
 			for(const leftTbarKey in config.leftTbar) {
 				if(config.leftTbar.hasOwnProperty(leftTbarKey)) {
 					tbar.push(config.leftTbar[leftTbarKey])
@@ -285,12 +299,30 @@ extraExt.create(
 			}
 			return tbar
 		},
+		getBotBar: function(config) {
+			if(this.paging == 1 || config.paging == 1) {
+				return undefined
+			}
+			var bbar = this.bbar || []
+			for(const leftBbarKey in config.leftBbar) {
+				if(config.leftTbar.hasOwnProperty(leftBbarKey)) {
+					bbar.push(config.leftBbar[leftBbarKey])
+				}
+			}
+			bbar.push('->')
+			for(const rightBbarKey in config.rightBbar) {
+				if(config.rightTbar.hasOwnProperty(rightBbarKey)) {
+					bbar.push(config.rightBbar[rightBbarKey])
+				}
+			}
+			return bbar
+		},
 		extraExtSearchFn: function(tf) {
-			this.getStore().baseParams.query = tf.getValue()
+			this.getStore().baseParams[this.searchKey] = tf.getValue()
 			this.getBottomToolbar().changePage(1)
 		},
 		extraExtClearSearch: function() {
-			this.getStore().baseParams.query = ''
+			this.getStore().baseParams[this.searchKey] = null
 			this.getBottomToolbar().changePage(1)
 		},
 		ExtraExtCreate: function() {
@@ -300,6 +332,42 @@ extraExt.create(
 				type: 'add',
 				table: this,
 			}).show()
+		},
+		onClick: function(e) {
+			var elem = e.getTarget()
+			if(elem.hasAttribute(extraExt.clickGridAction)) {
+				var row = this.getSelectionModel().getSelected()
+				if(typeof (row) != 'undefined') {
+					var action = elem.getAttribute('action')
+					if(action == 'showMenu') {
+						var ri = this.getStore().find('id', row.id)
+						return this._showMenu(this, ri, e)
+					} else if(typeof this[action] === 'function') {
+						this.menu.record = row.data
+						var x = elem.getAttribute('data-x')
+						var y = elem.getAttribute('data-y')
+						var row = this.getRow(y)
+						var col = this.getCol(x)
+						return this[action].call(this, e, row, col, x, y)
+					}
+				}
+			} else if(elem.nodeName == 'A' && elem.href.match(/(\?|\&)a=resource/)) {
+				if(e.button == 1 || (e.button == 0 && e.ctrlKey == true)) {
+					// Bypass
+				} else if(elem.target && elem.target == '_blank') {
+					// Bypass
+				} else {
+					e.preventDefault()
+					MODx.loadPage('', elem.href)
+				}
+			}
+			return this.processEvent('click', e)
+		},
+		getRow: function(y) {
+			return this.store.data.items[y]
+		},
+		getCol: function(x) {
+			return this.getColumnModel().config[x]
 		},
 	}]
 )

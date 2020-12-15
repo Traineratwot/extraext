@@ -18,6 +18,7 @@
 	$_lang['extraExt.Deselect_All']   = 'Отменить все';
 	$_lang['extraExt.select']         = 'Выбрать';
 	$_lang['extraExt.link']           = 'Ссылка';
+	$_lang['extraExt.increase']       = 'Увеличить';
 	$_lang['extraExt.search']         = 'Поиск';
 	$_lang['extraExt.html.success']   = '<span class="true">успех</span>';
 	$_lang['extraExt.html.failure']   = '<span class="false">неудача</span>';

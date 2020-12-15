@@ -25,6 +25,9 @@ columns = [
 0) extraExt.grid.renderers.MD
 0) extraExt.grid.renderers.BOOL
 0) extraExt.grid.renderers.RADIO
+0) extraExt.grid.renderers.HEX
+0) extraExt.grid.renderers.IMAGE
+0) extraExt.grid.renderers.CONTROL
 0) кнопка для открытия `просмотра` этой ячейки
 
 Демонстрация `просмотра`

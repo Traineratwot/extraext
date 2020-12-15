@@ -16,6 +16,7 @@
 	$_lang['extraExt.Select_All']     = 'Select All';
 	$_lang['extraExt.Deselect_All']   = 'Cancel All';
 	$_lang['extraExt.select']         = 'Select';
+	$_lang['extraExt.increase']       = 'Increase';
 	$_lang['extraExt.link']           = 'Link';
 	$_lang['extraExt.search']         = 'Search';
 	$_lang['extraExt.html.success']   = '<span class="true">success</span>';

@@ -10,8 +10,25 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 		'=': '&#x3D;'
 	}
 	eventData = {}
+	fns = {}
 
 
+	/**
+	 * @param {number} len
+	 */
+	genKey(len = 10) {
+		var password = ''
+		var symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
+		for(var i = 0; i < len; i++) {
+			password += symbols.charAt(Math.floor(Math.random() * symbols.length))
+		}
+		return password
+	}
+
+
+	/**
+	 * @param {extraExt.classes.grid.renderers} e
+	 */
 	popUp(e) {
 		var data = extraExt.grid.renderers.eventData[e.dataset.eventdata]
 		var value = data.meta.rawValue
@@ -32,16 +49,9 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 	}
 
 
-	jsonBeautify(val) {
-		try {
-			var jsObj = JSON.parse(val)
-			return JSON.stringify(jsObj, null, '\t')
-		} catch(e) {
-			return val
-		}
-
-	}
-
+	/**
+	 * @param {string} val
+	 */
 
 	/**
 	 * @author Traineratwot
@@ -61,7 +71,7 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 			cellMaxHeight: 30,
 			popup: false,
 			preRenderer: (val, cell, row, y, x, table) => {
-				return extraExt.empty(val) ? '<span class="false">' + _('ext_emptygroup') + '<span>' : val
+				return extraExt.empty(val) ? '<span class="extraExt false">' + _('ext_emptygroup') + '<span>' : val
 			},
 		}, config)
 		meta = Object.assign({
@@ -91,19 +101,19 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 				table: table,
 				meta: meta,
 			}
-			out = `<div class="extraExt_renderers">
-				<span class="extraExt_renderers_open" data-eventdata="${id}" onclick="extraExt.grid.renderers.popUp(this)">
-					<svg class="extraExt_popup" xmlns="http://www.w3.org/2000/svg" version="1.1" id="Popup" x="0px" y="0px" viewBox="0 0 20 20" xml:space="preserve">
+			out = `<div class="extraExt extraExt_renderers" >
+				<span class="extraExt extraExt_renderers_open" data-eventdata="${id}" onclick="extraExt.grid.renderers.popUp(this)">
+					<svg class="extraExt extraExt_popup" xmlns="http://www.w3.org/2000/svg" version="1.1" id="Popup" x="0px" y="0px" viewBox="0 0 20 20" xml:space="preserve">
 						<path d="M16 2H7.979C6.88 2 6 2.88 6 3.98V12c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 10H8V4h8v8zM4 10H2v6c0 1.1.9 2 2 2h6v-2H4v-6z"/>
 					</svg>
 				</span>
-				<div class="extraExt_renderers_body" style="overflow: auto; max-height:${config.cellMaxHeight}px ;max-width: ${this.width}px">
+				<div class="extraExt extraExt_renderers_body" style="overflow: auto; max-height:${config.cellMaxHeight}px ;max-width: ${this.width}px">
 					${out}
 				</div>
 			</div>`
 		} else {
-			out = `<div class="extraExt_renderers">
-				<div class="extraExt_renderers_body">
+			out = `<div class="extraExt extraExt_renderers">
+				<div class="extraExt extraExt_renderers_body">
 					${out}
 				</div>
 			</div>`
@@ -318,7 +328,7 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 			try {
 				out = hljs.highlight('json', val).value
 			} catch(e) {
-				out = `<pre><code class="language-json">${val}</code></pre>`
+				out = `<pre><code class="extraExt language-json">${val}</code></pre>`
 			}
 		}
 		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
@@ -344,9 +354,9 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 			return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {type: 'BOOL'})
 		}
 		if(val === false || val === 'false' || val === 0 || val === '0') {
-			out = `<span class="false">${_('no')}</span>`
+			out = `<span class="extraExt false">${_('no')}</span>`
 		} else if(val === true || val === 'true' || val === 1 || val === '1') {
-			out = `<span class="true">${_('yes')}</span>`
+			out = `<span class="extraExt true">${_('yes')}</span>`
 		}
 		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
 			type: 'BOOL',
@@ -372,9 +382,9 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 			return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {type: 'CHECKBOX'})
 		}
 		if(val === false || val === 'false' || val === 0 || val === '0') {
-			out = `<div class="x-form-check-wrap" style="width: 100%; height: 18px;"><input type="checkbox" disabled autocomplete="off" id="${id}" name="" class=" x-form-checkbox x-form-field"><label for="${id}" class="x-form-cb-label">&nbsp;</label></div>`
+			out = `<div class="extraExt x-form-check-wrap" style="width: 100%; height: 18px;"><input type="checkbox" disabled autocomplete="off" id="${id}" name="" class="extraExt x-form-checkbox x-form-field"><label for="${id}" class="extraExt x-form-cb-label">&nbsp;</label></div>`
 		} else if(val === true || val === 'true' || val === 1 || val === '1') {
-			out = `<div class="x-form-check-wrap" style="width: 100%; height: 18px;"><input type="checkbox" disabled autocomplete="off" id="${id}" name="" class=" x-form-checkbox x-form-field" checked="true"><label for="${id}" class="x-form-cb-label">&nbsp;</label></div>`
+			out = `<div class="extraExt x-form-check-wrap" style="width: 100%; height: 18px;"><input type="checkbox" disabled autocomplete="off" id="${id}" name="" class="extraExt x-form-checkbox x-form-field" checked="true"><label for="${id}" class="extraExt x-form-cb-label">&nbsp;</label></div>`
 		}
 		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
 			type: 'CHECKBOX',
@@ -393,8 +403,6 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 	 * @param table {object}
 	 */
 	RADIO(val, cell, row, y, x, table) {
-		// console.debug(table)
-		// console.debug(this)
 		var values = []
 		for(const itemsKey in table.data.items) {
 			if(table?.data?.items.hasOwnProperty(itemsKey)) {
@@ -408,17 +416,17 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 		if(val === null) {
 			return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {type: 'BOOL'})
 		}
-		out = `<div class="x-form-check-wrap" style="width: 100%; height: 18px;">`
+		out = `<div class="extraExt x-form-check-wrap" style="width: 100%; height: 18px;">`
 		values = extraExt.uniqueArray(values)
 		values.forEach((e) => {
 			var id = Ext.id()
 			if(val != e) {
-				out += `<input type="radio" autocomplete="off" disabled id="${id}" name="" class=" x-form-radio x-form-field">
-					<label for="${id}" class="x-form-cb-label">${e}&nbsp;</label>
+				out += `<input type="radio" autocomplete="off" disabled id="${id}" name="" class="extraExt x-form-radio x-form-field">
+					<label for="${id}" class="extraExt x-form-cb-label">${e}&nbsp;</label>
 					<br>`
 			} else {
-				out += `<input type="radio" autocomplete="off" disabled id="${id}" name="" class=" x-form-radio x-form-field" checked="true">
-					<label for="${id}" class="x-form-cb-label">${e}&nbsp;</label>
+				out += `<input type="radio" autocomplete="off" disabled id="${id}" name="" class="extraExt x-form-radio x-form-field" checked="true">
+					<label for="${id}" class="extraExt x-form-cb-label">${e}&nbsp;</label>
 					<br>`
 			}
 		})
@@ -430,19 +438,153 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 	}
 
 
+	/**
+	 * @param {*} val
+	 * @param {Object} cell
+	 * @param {Object} row
+	 * @param {*} y
+	 * @param {*} x
+	 * @param {Object} table
+	 */
 	HEX(val, cell, row, y, x, table) {
 		var rawValue = val
 		var out = val
 		var id = Ext.id()
-		if(val === null || (val.length < 6 && val.length > 8)) {
+		if(val === null || (val.length < 3 || val.length > 9)) {
 			return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {type: 'HEX'})
 		}
 		if(val.substring(0, 1) != '#') {
 			val = '#' + val
 		}
-		out = `<div class="extraExt_HEX" style="background-color:${val}"><span style="color:${val}">${rawValue}</span></div>`
+		// out = `<div class="extraExt_HEX" ><span class="extraExt-contrast">
+		// 		  ${rawValue}
+		// 		</span></span></div>`
+		out = `<div class="extraExt extraExt_HEX" id="${id}">
+					<span>${rawValue}</span>
+					<i class="extraExt fas fa-circle"style="color:${val}"></i>
+			   </div>`
 		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
 			type: 'HEX',
+			rawValue: rawValue
+		})
+	}
+
+
+	/**
+	 * @param {*} val
+	 * @param {Object} cell
+	 * @param {Object} row
+	 * @param {*} y
+	 * @param {*} x
+	 * @param {Object} table
+	 */
+	IMAGE(val, cell, row, y, x, table) {
+		var rawValue = val
+		var out = val
+		if(Ext.isEmpty(val)) {
+			return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
+				type: 'IMAGE',
+				rawValue: rawValue
+			})
+		} else {
+			if(!/\/\//.test(val)) {
+				if(!/^\//.test(val)) {
+					val = '/' + val
+				}
+			}
+		}
+		out = `<a target="_blank" href="${val}"><img src="${val}" alt="нет фото"/></a>`
+		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
+			type: 'IMAGE',
+			rawValue: rawValue
+		})
+	};
+
+
+	/**
+	 * @param {*} val
+	 * @param {Object} cell
+	 * @param {Object} row
+	 * @param {*} y
+	 * @param {*} x
+	 * @param {Object} table
+	 */
+	CONTROL(val, cell, row, y, x, table) {
+		var rawValue = val
+		var out = val
+		var extraExtRenderer = this.extraExtRenderer || {}
+		var res = []
+		var cls, icon, title, action, item = '', controls = []
+		if(extraExtRenderer.hasOwnProperty('controls')) {
+			controls = extraExtRenderer.controls
+		} else if(row.data.hasOwnProperty('controls')) {
+			controls = row.data.controls
+		} else if(row.data.hasOwnProperty('actions')) {
+			controls = row.data.actions
+		} else {
+			return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
+				type: 'CONTROL',
+				rawValue: rawValue
+			})
+		}
+		for(var i in controls) {
+			if(controls.hasOwnProperty(i)) {
+				var a = controls[i]
+				var icon = a['icon'] ? a['icon'] : ''
+				var type = a['type'] ? a['type'] : 'button'
+				var text = a['text'] ? a['text'] : ''
+				var cls = a['cls'] ? a['cls'] : ''
+				var action = a['action'] ? a['action'] : ''
+				var title = a['title'] ? a['title'] : ''
+				var href = a['href'] ? a['href'] : ''
+				if(icon instanceof extraExt.classes.util.icon) {
+				} else {
+					icon = new extraExt.classes.util.icon(icon)
+				}
+
+				switch( type.toLowerCase() ) {
+					case 'button':
+						item = `<li class="extraExt ${cls}"><button class="extraExt btn btn-default" action="${action}" title="${title}">${icon.render()} ${text}</button></li>`
+						break
+					case 'link':
+						item = `<li class="extraExt ${cls}"><a class="extraExt btn btn-default" href="${href}" action="${action}" title="${title}" >${icon.render()} ${text}</a></li>`
+						break
+				}
+
+				res.push(item)
+
+			}
+			var attrs = [
+				extraExt.clickGridAction + '=true',
+				`action=${action}`,
+				`data-x=${x}`,
+				`data-y=${y}`,
+			]
+			res = res.join('\n')
+			var node = new DOMParser().parseFromString(res, 'text/html')
+			node.body.querySelectorAll('li *').forEach(function(item) {
+				for(const attrsKey in attrs) {
+					if(attrs.hasOwnProperty(attrsKey)) {
+						if(typeof attrs[attrsKey] == 'string') {
+							var attr = attrs[attrsKey].split('=')
+							var name = attr[0]
+							var value = attr[1]
+							if(name && value) {
+								item.setAttribute(name, value)
+							}
+						}
+					}
+
+				}
+			})
+			res = node.body.innerHTML
+			return String.format(
+				'<ul class="extraExt extraExt-row-actions">{0}</ul>',
+				res
+			)
+		}
+		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
+			type: 'CONTROL',
 			rawValue: rawValue
 		})
 	}
@@ -461,6 +603,8 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
  * @see CHECKBOX
  * @see RADIO
  * @see HEX
+ * @see IMAGE
+ * @see CONTROL
  */
 extraExt.grid.renderers = new extraExt.classes.grid.renderers()
 

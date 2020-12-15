@@ -10,10 +10,11 @@ Ext.onReady(function() {
 		extraExt.activeLastTab()
 	}, 50)
 	try {
-		window['extraExt-copyright-img'].src = extraExtUrl+'media/extraExt.long.png'
-	}catch (e) {}
+		window['extraExt-copyright-img'].src = extraExtUrl + 'media/extraExt.long.png'
+	} catch(e) {}
 })
 showdown.setFlavor('github')
+MODx.config.modx_browser_default_viewmode = 'list'
 var extraExt = {
 	url: (new URL(document.location)),
 	xTypes: {},
@@ -43,11 +44,16 @@ var extraExt = {
 		 * @see CHECKBOX
 		 * @see RADIO
 		 * @see HEX
+		 * @see IMAGE
+		 * @see CONTROL
 		 */
 		renderers: {},
 	},
 	window: {
 		xtype: 'extraExt-window'
+	},
+	simpleWindow: {
+		xtype: 'extraExt-simpleWindow'
 	},
 	inputs: {
 		modCombo: {
@@ -55,16 +61,25 @@ var extraExt = {
 		},
 		modComboSuper: {
 			xtype: 'extraExt-modComboSuper'
-		}
-		,
+		},
 		search: {
 			xtype: 'extraExt-search'
-		}
+		},
 	},
 	tabs: {
 		xtype: 'extraExt-tabs'
 	},
+	form: {
+		xtype: 'extraExt-form'
+	},
 	bu: {},
+	browser: {
+		xtype: "extraExt-browser",
+		browser: {xtype: "extraExt-browser-browser"},
+		tree: {xtype: "extraExt-browser-Tree"},
+		view: {xtype: "extraExt-browser-View"},
+		window: {xtype: "extraExt-browser-Window"}
+	},
 	requireConfigField: {},
 	mdConverter: new showdown.Converter({
 		tables: true,
@@ -80,6 +95,7 @@ var extraExt = {
 		// smoothPreview: '#wrap'
 	}),
 	util: {},
+	clickGridAction: 'data-extraext-grid_action',
 	uniqueArray: (a) => {
 		try {
 			return [...new Set(a)]
@@ -243,3 +259,50 @@ extraExt.classes.settings = class {
 	}
 }
 extraExt.settings = new extraExt.classes.settings()
+//переопределение menu
+Ext.menu.Item.prototype.onRender = function(d, b) {
+	if(!this.itemTpl) {
+		this.itemTpl = Ext.menu.Item.prototype.itemTpl = new Ext.XTemplate(
+			'<a id="{id}" class="{cls} x-unselectable" hidefocus="true" unselectable="on" href="{href}"',
+			'<tpl if="hrefTarget">', ' target="{hrefTarget}"',
+			'</tpl>',
+			'>',
+			'<img alt="{altText}" src="{icon}" class="x-menu-item-icon {iconCls}"/>',
+			'<span class="x-menu-item-text">{text}</span>',
+			'</a>')
+	}
+	if(this.hasOwnProperty('options') && this.options.hasOwnProperty('icon')) {
+		this.itemTpl = Ext.menu.Item.prototype.itemTpl = new Ext.XTemplate(
+			'<a id="{id}" class="{cls} x-unselectable" hidefocus="true" unselectable="on" href="{href}"',
+			'<tpl if="hrefTarget">', ' target="{hrefTarget}"',
+			'</tpl>',
+			'>',
+			'<span title="{altText}" style="text-align: center;" class="x-menu-item-icon {iconCls}">{icon}</span>',
+			'<span class="x-menu-item-text">{text}</span>',
+			'</a>')
+	}
+	var c = this.getTemplateArgs()
+	this.el = b ? this.itemTpl.insertBefore(b, c, true) : this.itemTpl.append(d, c, true)
+	this.iconEl = this.el.child('img.x-menu-item-icon')
+	this.textEl = this.el.child('.x-menu-item-text')
+	if(!this.href) {this.mon(this.el, 'click', Ext.emptyFn, null, {preventDefault: true})}
+	Ext.menu.Item.superclass.onRender.call(this, d, b)
+}
+Ext.menu.Item.prototype.getTemplateArgs = function() {
+	var icon = Ext.BLANK_IMAGE_URL
+	if(this.hasOwnProperty('options') && this.options.hasOwnProperty('icon') && this.options.icon) {
+		icon = this.options.icon
+	}else{
+		icon = this.icon
+	}
+	return {
+		id: this.id,
+		cls: this.itemCls + (this.menu ? ' x-menu-item-arrow' : '') + (this.cls ? ' ' + this.cls : ''),
+		href: this.href || '#',
+		hrefTarget: this.hrefTarget,
+		icon: icon,
+		iconCls: this.iconCls || '',
+		text: this.itemText || this.text || '&#160;',
+		altText: this.altText || ''
+	}
+}

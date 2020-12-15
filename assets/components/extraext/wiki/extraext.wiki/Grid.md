@@ -28,19 +28,35 @@ obj = {
 			dataIndex: 'name',
 			header: 'name',
 			sortable: true,
-			editor: {xtype:'textfield'},
+			editor: {xtype: 'textfield'},
 			extraExtEditor: {},
 			renderer: extraExt.grid.renderers.default
 
 		},
+		{// столбец с кнопками упарвления
+			dataIndex: 'CONTROL',
+			header: 'CONTROL',
+			extraExtRenderer: {
+				controls: [
+					{
+						action: 'test',
+						icon: 'far fa-arrow-alt-from-left',//класс Fontavesome или любой html текст
+                        text:'',
+                        type: 'button',// button or link
+						cls: '' // custom class for li
+					}
+				],
+			},
+			renderer: extraExt.grid.renderers.CONTROL,
+		},
 	],
 	extraExtSearch: true,//Включает поиск
-    searchKey:'query', // ключ для поиска
+	searchKey: 'query', // ключ для поиска
 	extraExtUpdate: true,//Включает форму обновления
 	extraExtCreate: true,//Включает кнопку создания
-    extraEditor: extraExt.grid.editor.xtype,//xtype окна редактора
+	extraEditor: extraExt.grid.editor.xtype,//xtype окна редактора
 	extraExtDelete: true,//Включает удаление 
-    requestDataType:'form',
+	requestDataType: 'form',
 	action: 'element/snippet/getlist', //стандартный action
 	create_action: 'element/snippet/create', // путь к процессору создания нового элемента
 	save_action: 'element/snippet/update', //стандартный save_action
@@ -49,6 +65,7 @@ obj = {
 	keyField: 'id',//устанавливает столбец id для сроки
 	addMenu: function(m, grid, rowIndex) { //замена стандартного getMenu
 		m.push({
+            icon:'<i class="fas fa-university"></i>', // иконка пункта меню
 			text: 'текст',
 			grid: grid,
 			rowIndex: rowIndex,
@@ -61,6 +78,9 @@ obj = {
 	sortDir: 'desc',
 	requestDataType: 'form',
 	fields: ['id', 'name'],
+    test:function(){
+    
+    }
 	// url: MODx.config.connector_url, //по умолчанию
 }
 ```

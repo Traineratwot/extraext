@@ -49,6 +49,7 @@ extraExt.create(
 						id: `${col.dataIndex}_${type}_${ident}`,
 						anchor: '99%',
 						allowBlank: true,
+						prepare: function(data) {return data}
 					}
 					if(col.hasOwnProperty('renderer')) {
 						if(col.renderer instanceof Function)
@@ -77,7 +78,11 @@ extraExt.create(
 						}
 					}
 					if(config.hasOwnProperty('updateData') && config.updateData.hasOwnProperty(col.dataIndex)) {
-						editor.value = config.updateData[col.dataIndex]
+						if(editor.hasOwnProperty('prepare') && editor.prepare instanceof Function) {
+							editor.value = editor.prepare(config.updateData[col.dataIndex])
+						} else {
+							editor.value = config.updateData[col.dataIndex]
+						}
 					}
 					if(extraExt.requireConfigField.hasOwnProperty(editor.xtype)) {
 						for(const key of extraExt.requireConfigField[editor.xtype]) {

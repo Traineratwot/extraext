@@ -5,6 +5,7 @@
 		public $componentName = '';
 		public $componentUrl = '';
 		public $connectorUrl = '';
+		public $noManagerMode = FALSE;
 		private $cachePaths = [];
 		private $cachePathsGet = FALSE;
 		/**
@@ -31,8 +32,8 @@
 				$this->cache = $this->modx->getCacheManager();
 				$this->cachePaths = $this->cache->get('includes', [xPDO::OPT_CACHE_KEY => 'extraExt']);
 				$this->cachePathsGet = TRUE;
-				$this->assets = rtrim($modx->getOption('assets_url',null,'/assets'), '/') . '/';
-				$this->copyright = (bool)$modx->getOption('extraext_copyright', null, TRUE);
+				$this->assets = rtrim($modx->getOption('assets_url', NULL, '/assets'), '/') . '/';
+				$this->copyright = (bool)$modx->getOption('extraext_copyright', NULL, TRUE);
 				if (!$this->componentName) {
 					$this->componentName = $_GET['namespace'];
 				}
@@ -42,37 +43,49 @@
 					'extraext:default',
 				];
 				$this->extraExtUrl = $this->assets . "components/extraext/";
+				if(!$this->devMode){
+					$sufix = '.min';
+				}else{
+					$sufix = '';
+				}
 				$this->addCss("js/libs/highlight/styles/{$style}.min.css", $this->extraExtUrl);
-				$this->addCss('css/main.tab.css', $this->extraExtUrl);
-				$this->addCss('css/colorpicker.css', $this->extraExtUrl);
-				$this->addJavascript('js/libs/highlight/highlight.pack.js', $this->extraExtUrl);
+				$this->addCss('css/main.tab'.$sufix.'.css', $this->extraExtUrl);
+				$this->addCss('css/fontawesome'.$sufix.'.css', $this->extraExtUrl);
+				$this->addCss('css/colorpicker'.$sufix.'.css', $this->extraExtUrl);
+				$this->addCss('css/firacode.min.css', $this->extraExtUrl);
 				$this->addJavascript('js/libs/highlight/highlight.pack.js', $this->extraExtUrl);
 				$this->addJavascript('js/libs/showdown/dist/showdown.min.js', $this->extraExtUrl);
-				$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
-				$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-css.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
-				$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-html.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
-				$devMode = (int)$this->devMode;
-				$this->addHtml("<script type='text/javascript' class='extraExt-constants'>
+				if(!$this->noManagerMode) {
+					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
+					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-css.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
+					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-html.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
+					$devMode = (int)$this->devMode;
+					$this->addHtml("<script type='text/javascript' class='extraExt-constants'>
 					const assetsUrl = `{$this->assets}`
 					const {$this->componentName}ConnectorUrl = `{$this->connectorUrl}`
 					const {$this->componentName}AssetsUrl = `{$this->componentUrl}`
 					const extraExtUrl = `{$this->extraExtUrl}`
 					const componentName = `{$this->componentName}` 
 					const devMode = `{$devMode}`== '0'?false:true
+					const ExtraHead = JSON.parse(`" . json_encode($this->ExtraHead) . "`)
 				</script>");
-				$this->addJavascript('js/main.js', $this->extraExtUrl);
-				$this->addJavascript('js/util.js', $this->extraExtUrl);
-				$this->addJavascript('js/inputs/combo.js', $this->extraExtUrl);
-				$this->addJavascript('js/inputs/colorpicker/colorpicker.js', $this->extraExtUrl);
-				$this->addJavascript('js/inputs/colorpicker/colorpickerfield.js', $this->extraExtUrl);
-				$this->addJavascript('js/widgets/window.js', $this->extraExtUrl);
-				$this->addJavascript('js/widgets/grid/renderer.js', $this->extraExtUrl);
-				$this->addJavascript('js/widgets/grid/grid.js', $this->extraExtUrl);
-				$this->addJavascript('js/widgets/grid/editor.js', $this->extraExtUrl);
-				$this->addJavascript('js/widgets/tab.js', $this->extraExtUrl);
+					$this->addJavascript('js/main.js', $this->extraExtUrl);
+					$this->addJavascript('js/util.js', $this->extraExtUrl);
+					$this->addJavascript('js/inputs/combo.js', $this->extraExtUrl);
+					$this->addJavascript('js/inputs/colorpicker/colorpicker.js', $this->extraExtUrl);
+					$this->addJavascript('js/inputs/colorpicker/colorpickerfield.js', $this->extraExtUrl);
+					$this->addJavascript('js/widgets/window.js', $this->extraExtUrl);
+					$this->addJavascript('js/widgets/grid/renderer.js', $this->extraExtUrl);
+					$this->addJavascript('js/widgets/grid/grid.js', $this->extraExtUrl);
+					$this->addJavascript('js/widgets/grid/editor.js', $this->extraExtUrl);
+					$this->addJavascript('js/widgets/tab.js', $this->extraExtUrl);
+					$this->addJavascript('js/widgets/form.js', $this->extraExtUrl);
+					$this->addJavascript('js/widgets/browser.js', $this->extraExtUrl);
 				if ($this->copyright == TRUE) {
 					$this->addHtml($this->_download(MODX_ASSETS_PATH . 'components/extraext/copyright.tpl'));
 				}
+				}
+
 			} catch (Exception $e) {
 				$this->modx->log(modX::LOG_LEVEL_ERROR, $e->getMessage(), '', __METHOD__ ?: __FUNCTION__, __FILE__, __LINE__);
 			}
@@ -113,6 +126,7 @@
 			$t = strpos($finalPath, '//');
 			$remote = ($t !== FALSE and $t <= 10) ? TRUE : FALSE;
 			if ($cache and $remote) {
+
 				try {
 					$hash = md5($finalPath);
 					if (empty($this->cachePaths) and $this->cachePathsGet == FALSE) {
@@ -133,14 +147,14 @@
 						$this->cache->set('includes', $this->cachePaths, 0, [xPDO::OPT_CACHE_KEY => 'extraExt']);
 						throw new Exception($this->cachePaths[$hash], 1);
 					} else {
-						throw new Exception('', 0);
+						throw new Exception('', 3);
 					}
-
 				} catch (Exception $e) {
 					if ($e->getCode() == 0) {
 						$finalPath = $script;
 					} elseif ($e->getCode() == 1) {
 						$finalPath = $e->getMessage();
+					} elseif ($e->getCode() == 3) {
 					}
 				}
 			}
@@ -153,6 +167,8 @@
 				$finalPath .= "?v=" . $v;
 			}
 			$this->head[$key][] = $finalPath;
+			$this->ExtraHead[$key][] = $finalPath;
+			array_unique($this->head[$key]);
 			return $finalPath;
 		}
 
@@ -273,5 +289,38 @@
 		{
 			$_tmp = explode('.', basename($file));
 			return end($_tmp);
+		}
+
+		public function render()
+		{
+			if (!$this->noManagerMode) {
+				return parent::render();
+			} else {
+
+				if (!$this->checkPermissions()) {
+					return $this->modx->error->failure($this->modx->lexicon('access_denied'));
+				}
+				$this->loadCustomCssJs();
+				foreach ($this->head as $key=>$Paths) {
+					foreach($Paths as $finalPath) {
+						switch ($key) {
+							case 'js':
+								echo '<script src="' . $finalPath . '" class="ExtraExt"></script>' . PHP_EOL;
+								break;
+							case 'css':
+								echo '<link rel="stylesheet" href="' . $finalPath . '" class="ExtraExt"></script>' . PHP_EOL;
+								break;
+							case 'lastjs':
+								echo '<script defer src="' . $finalPath . '" class="ExtraExt"></script>' . PHP_EOL;
+								break;
+							case 'html':
+								echo $finalPath . PHP_EOL;
+								break;
+						}
+					}
+				}
+				exit($this->content);
+
+			}
 		}
 	}
