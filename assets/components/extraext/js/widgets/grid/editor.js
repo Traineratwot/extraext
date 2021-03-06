@@ -17,8 +17,10 @@ extraExt.create(
 		var _updateData = {}
 		config.url = table.url
 		config.requestDataType = table.requestDataType
+		config.baseParams = Object.assign({}, table.store.baseParams)
 		switch( type ) {
 			case 'add':
+				config.baseParams.action = table.create_action
 				config.action = table.create_action
 				break
 			default:
@@ -30,6 +32,7 @@ extraExt.create(
 					}
 				}
 				config.updateData = Object.assign(_updateData, config.updateData)
+				config.baseParams.action = table.save_action
 				config.action = table.save_action
 				break
 		}
@@ -49,8 +52,9 @@ extraExt.create(
 						id: `${col.dataIndex}_${type}_${ident}`,
 						anchor: '99%',
 						allowBlank: true,
-						prepare: function(data) {return data}
+						valuePrepare: function(data) {return data}
 					}
+
 					if(col.hasOwnProperty('renderer')) {
 						if(col.renderer instanceof Function)
 							switch( col.renderer.name ) {
@@ -67,7 +71,10 @@ extraExt.create(
 
 							}
 					}
-
+					if(type != 'add' && col.dataIndex == config.table.keyField){
+						editor.visible = false;
+						editor.xtype = 'hidden'
+					}
 					if(col.hasOwnProperty('extraExtEditor')) {
 						editor = Object.assign(editor, col.extraExtEditor)
 						if(editor.visible == false) {
@@ -79,7 +86,8 @@ extraExt.create(
 					}
 					if(config.hasOwnProperty('updateData') && config.updateData.hasOwnProperty(col.dataIndex)) {
 						if(editor.hasOwnProperty('prepare') && editor.prepare instanceof Function) {
-							editor.value = editor.prepare(config.updateData[col.dataIndex])
+							editor.value = editor.valuePrepare(config.updateData[col.dataIndex])
+
 						} else {
 							editor.value = config.updateData[col.dataIndex]
 						}

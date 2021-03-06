@@ -163,8 +163,7 @@ extraExt.create(
 		extraExt.xTypes[extraExt.inputs.modComboSuper.xtype].superclass.constructor.call(this, config)
 	},
 	Ext.ux.form.SuperBoxSelect,
-	[{
-	}]
+	[{}]
 )
 
 extraExt.create(
@@ -228,12 +227,25 @@ extraExt.create(
 			prepare: function(data) {return data},
 			dePrepare: function(data) {return data},
 		})
+		this.valuePrepare = function(a) {
+			try {
+				if(a instanceof Array || typeof a === 'object') {
+					return JSON.stringify(a)
+				}
+				return a
+			} catch(e) {
+				return a
+			}
+		}
+		config.value = this.valuePrepare(config.value)
 		extraExt.xTypes[extraExt.inputs.search.xtype].superclass.constructor.call(this, config)
 		this.fieldsPrepare()
+
 	},
 	Ext.form.TriggerField,
 	[
 		{
+
 			fieldsPrepare: function() {
 				for(const fieldsKey in this.fields) {
 					var field = this.fields[fieldsKey]
@@ -251,7 +263,7 @@ extraExt.create(
 			triggerClass: 'far fa-edit',
 			onTriggerClick: function(btn) {
 				return !this.disabled && (this.browser = MODx.load({
-					xtype: extraExt.simpleWindow.xtype,
+					xtype: extraExt.popupWindow.xtype,
 					width: window.innerWidth / 100 * 50,
 					height: window.innerHeight / 100 * 50,
 					fields: this.fields || [],
@@ -275,7 +287,86 @@ extraExt.create(
 			},
 			onDestroy: function() {
 				extraExt.xTypes[extraExt.inputs.popup.xtype].superclass.onDestroy.call(this)
+			},
+		}
+	]
+)
+extraExt.inputs.infinity = {}
+extraExt.inputs.infinity.xtype = 'extraExt-infinity'
+extraExt.create(
+	extraExt.inputs.infinity.xtype,
+	function(config) {
+		Ext.applyIf(config, {
+			field: {xtype: 'textfield'},
+			id: Ext.id(),
+			prepare: function(data) {return data},
+			dePrepare: function(data) {return data},
+		})
+		extraExt.xTypes[extraExt.inputs.search.xtype].superclass.constructor.call(this, config)
+		this.fieldPrepare()
+	},
+	Ext.form.TriggerField,
+	[
+		{
+			field: {xtype: 'textfield', name: 'infinity'},
+			fields: [],
+			fieldPrepare: function() {
+				Ext.applyIf(this.field, {
+					fieldLabel: null,
+					anchor: '99%',
+				})
+				this.field.requestDataType = 'json'
+				this.fields = []
+				try {
+					var value = JSON.parse(this.getValue())
+					var i = 1
+					for(const valueKey in value) {
+						if(value.hasOwnProperty(valueKey)) {
+							var field = Object.assign({}, this.field)
+							field.value = value[valueKey]
+							field.name = this.name + `-${i}`
+							field.fieldLabel = `<sub>${i}</sub>`
+							this.fields.push(field)
+							i++
+						}
+					}
+				} catch(e) {
+					this.setValue('')
+				}
+
+				return this.field || []
+			},
+			triggerClass: 'far fa-pen-square',
+			onTriggerClick: function(btn) {
+				return !this.disabled && (this.browser = MODx.load({
+					xtype: extraExt.infinityWindow.xtype,
+					width: window.innerWidth / 100 * 50,
+					height: window.innerHeight / 100 * 50,
+					field: this.field || {xtype: 'textfield', name: 'infinity'},
+					fields: this.fields || [],
+					returnCmpId: this.id,
+					returnCmp: this,
+					prepare: this.prepare,
+					dePrepare: this.dePrepare,
+					closeAction: 'close',
+					id: Ext.id(),
+					listeners: {
+						select: {
+							fn: function(data) {
+								this.setValue(data.relativeUrl),
+									this.fireEvent('select', data)
+							},
+							scope: this
+						}
+					}
+				}),
+					this.browser.show(btn),
+					!0)
+			},
+			onDestroy: function() {
+				extraExt.xTypes[extraExt.inputs.infinity.xtype].superclass.onDestroy.call(this)
 			}
 		}
 	]
 )
+

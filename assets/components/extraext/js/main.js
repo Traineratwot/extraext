@@ -52,8 +52,11 @@ var extraExt = {
 	window: {
 		xtype: 'extraExt-window'
 	},
-	simpleWindow: {
-		xtype: 'extraExt-simpleWindow'
+	popupWindow: {
+		xtype: 'extraExt-popupWindow'
+	},
+	infinityWindow: {
+		xtype: 'extraExt-infinityWindow'
 	},
 	inputs: {
 		modCombo: {
@@ -74,11 +77,11 @@ var extraExt = {
 	},
 	bu: {},
 	browser: {
-		xtype: "extraExt-browser",
-		browser: {xtype: "extraExt-browser-browser"},
-		tree: {xtype: "extraExt-browser-Tree"},
-		view: {xtype: "extraExt-browser-View"},
-		window: {xtype: "extraExt-browser-Window"}
+		xtype: 'extraExt-browser',
+		browser: {xtype: 'extraExt-browser-browser'},
+		tree: {xtype: 'extraExt-browser-Tree'},
+		view: {xtype: 'extraExt-browser-View'},
+		window: {xtype: 'extraExt-browser-Window'}
 	},
 	requireConfigField: {},
 	mdConverter: new showdown.Converter({
@@ -292,7 +295,7 @@ Ext.menu.Item.prototype.getTemplateArgs = function() {
 	var icon = Ext.BLANK_IMAGE_URL
 	if(this.hasOwnProperty('options') && this.options.hasOwnProperty('icon') && this.options.icon) {
 		icon = this.options.icon
-	}else{
+	} else {
 		icon = this.icon
 	}
 	return {
@@ -304,5 +307,23 @@ Ext.menu.Item.prototype.getTemplateArgs = function() {
 		iconCls: this.iconCls || '',
 		text: this.itemText || this.text || '&#160;',
 		altText: this.altText || ''
+	}
+}
+extraExt.bu._ = _
+_ = function(a = null) {
+	var out = extraExt.bu._(...arguments)
+	if(!out) {
+		out = a
+	}
+	return out
+}
+
+extraExt.bu.ComboBox_prototype_onLoad = MODx.combo.ComboBox.prototype.onLoad
+
+MODx.combo.ComboBox.prototype.onLoad = function() {
+	try {
+		return extraExt.bu.ComboBox_prototype_onLoad.call(this)
+	}catch(e) {
+		return false
 	}
 }

@@ -18,6 +18,9 @@
 	$_lang['extraExt.select']         = 'Select';
 	$_lang['extraExt.increase']       = 'Increase';
 	$_lang['extraExt.link']           = 'Link';
+	$_lang['extraExt.allow']          = 'Allow';
+	$_lang['extraExt.deny']           = 'Deny';
+	$_lang['extraExt.save']           = 'save <i class="fas fa-save"></i>';
 	$_lang['extraExt.search']         = 'Search';
 	$_lang['extraExt.html.success']   = '<span class="true">success</span>';
 	$_lang['extraExt.html.failure']   = '<span class="false">failure</span>';

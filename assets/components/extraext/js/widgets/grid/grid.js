@@ -16,8 +16,18 @@ extraExt.create(
 			requestDataType: 'form',
 			searchKey: 'query',
 			tbar: [],
-			leftTbar: [],
-			rightTbar: [],
+			leftTbar: function() {
+				return [];
+			},
+			rightTbar: function() {
+				return [];
+			},
+			rightBbar: function() {
+				return [];
+			},
+			leftBbar: function() {
+				return [];
+			},
 			columns: [
 				{
 					dataIndex: 'id',
@@ -55,6 +65,10 @@ extraExt.create(
 			extraExtCreate: false,
 			extraExtDelete: false,
 		}, config)
+		config.leftTbar  = config.leftTbar()
+		config.rightTbar = config.rightTbar()
+		config.rightBbar = config.rightBbar()
+		config.leftBbar  = config.leftBbar()
 		//add actions
 		if(config.extraExtCreate && config.create_action) {
 			if(!config.hasOwnProperty('createBtnText')) {
@@ -118,12 +132,11 @@ extraExt.create(
 		}
 		if(config.extraExtDelete && config.delete_action) {
 			this.extraExtDeleteFn = function() {
-				var cs = this.getSelectedAsList()
+				var cs = this.getSelectedPrimaryKey()
 				var self = this
 				var url = this.url
-				var params = {
-					action: this.delete_action,
-				}
+				var params = Object.assign({},this.store.baseParams)
+				params.action = this.delete_action
 				params[this.keyField] = cs
 				MODx.msg.confirm({
 					title: _('delete'),
@@ -192,7 +205,9 @@ extraExt.create(
 		if(config.hasOwnProperty('baseParams')) {
 			delete config.baseParams
 		}
+
 		extraExt.xTypes[extraExt.grid.xtype].superclass.constructor.call(this, config) // Магия
+
 		Object.assign(this.getStore().baseParams, config.base_params)
 		//validator
 		if(this.extraExtSearch) {

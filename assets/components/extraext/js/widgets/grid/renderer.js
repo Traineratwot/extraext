@@ -321,6 +321,33 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 	 * @param x {int}
 	 * @param table {object}
 	 */
+	CODE(val, cell, row, y, x, table) {
+		var config = this.extraExtRenderer || {}
+		var rawValue = val
+		if(val && config.code) {
+			var out = null
+			try {
+				out = hljs.highlight(config.code, val).value
+			} catch(e) {
+				out = val
+			}
+		}
+		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
+			type: 'CODE',
+			rawValue: rawValue
+		})
+	}
+
+
+	/**
+	 * @author Traineratwot
+	 * @param val {string}
+	 * @param cell {object}
+	 * @param row {object}
+	 * @param y {int}
+	 * @param x {int}
+	 * @param table {object}
+	 */
 	JSON(val, cell, row, y, x, table) {
 		var rawValue = val
 		if(val) {
@@ -513,7 +540,6 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 		var rawValue = val
 		var out = val
 		var extraExtRenderer = this.extraExtRenderer || {}
-		var res = []
 		var cls, icon, title, action, item = '', controls = []
 		if(extraExtRenderer.hasOwnProperty('controls')) {
 			controls = extraExtRenderer.controls
@@ -527,60 +553,65 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 				rawValue: rawValue
 			})
 		}
-		for(var i in controls) {
-			if(controls.hasOwnProperty(i)) {
-				var a = controls[i]
-				var icon = a['icon'] ? a['icon'] : ''
-				var type = a['type'] ? a['type'] : 'button'
-				var text = a['text'] ? a['text'] : ''
-				var cls = a['cls'] ? a['cls'] : ''
-				var action = a['action'] ? a['action'] : ''
-				var title = a['title'] ? a['title'] : ''
-				var href = a['href'] ? a['href'] : ''
-				if(icon instanceof extraExt.classes.util.icon) {
-				} else {
-					icon = new extraExt.classes.util.icon(icon)
-				}
-
-				switch( type.toLowerCase() ) {
-					case 'button':
-						item = `<li class="extraExt ${cls}"><button class="extraExt btn btn-default" action="${action}" title="${title}">${icon.render()} ${text}</button></li>`
-						break
-					case 'link':
-						item = `<li class="extraExt ${cls}"><a class="extraExt btn btn-default" href="${href}" action="${action}" title="${title}" >${icon.render()} ${text}</a></li>`
-						break
-				}
-
-				res.push(item)
-
-			}
-			var attrs = [
-				extraExt.clickGridAction + '=true',
-				`action=${action}`,
-				`data-x=${x}`,
-				`data-y=${y}`,
-			]
-			res = res.join('\n')
-			var node = new DOMParser().parseFromString(res, 'text/html')
-			node.body.querySelectorAll('li *').forEach(function(item) {
-				for(const attrsKey in attrs) {
-					if(attrs.hasOwnProperty(attrsKey)) {
-						if(typeof attrs[attrsKey] == 'string') {
-							var attr = attrs[attrsKey].split('=')
-							var name = attr[0]
-							var value = attr[1]
-							if(name && value) {
-								item.setAttribute(name, value)
-							}
-						}
+		var output = ''
+		if(controls) {
+			for(var i in controls) {
+				if(controls.hasOwnProperty(i)) {
+					var res = []
+					var a = controls[i]
+					var icon = a['icon'] ? a['icon'] : ''
+					var type = a['type'] ? a['type'] : 'button'
+					var text = a['text'] ? a['text'] : ''
+					var cls = a['cls'] ? a['cls'] : ''
+					var action = a['action'] ? a['action'] : ''
+					var title = a['title'] ? a['title'] : ''
+					var href = a['href'] ? a['href'] : ''
+					if(icon instanceof extraExt.classes.util.icon) {
+					} else {
+						icon = new extraExt.classes.util.icon(icon)
 					}
 
+					switch( type.toLowerCase() ) {
+						case 'button':
+							item = `<li class="extraExt ${cls}"><button class="extraExt btn btn-default" action="${action}" title="${title}">${icon.render()} ${text}</button></li>`
+							break
+						case 'link':
+							item = `<li class="extraExt ${cls}"><a class="extraExt btn btn-default" href="${href}" action="${action}" title="${title}" >${icon.render()} ${text}</a></li>`
+							break
+					}
+
+					res.push(item)
+
+					var attrs = [
+						extraExt.clickGridAction + '=true',
+						`action=${action}`,
+						`data-x=${x}`,
+						`data-y=${y}`,
+					]
+					res = res.join('\n')
+					var node = new DOMParser().parseFromString(res, 'text/html')
+					node.body.querySelectorAll('li *').forEach(function(item) {
+						for(const attrsKey in attrs) {
+							if(attrs.hasOwnProperty(attrsKey)) {
+								if(typeof attrs[attrsKey] == 'string') {
+									var attr = attrs[attrsKey].split('=')
+									var name = attr[0]
+									var value = attr[1]
+									if(name && value) {
+										item.setAttribute(name, value)
+									}
+								}
+							}
+
+						}
+					})
+					output += node.body.innerHTML
 				}
-			})
-			res = node.body.innerHTML
+			}
+
 			return String.format(
 				'<ul class="extraExt extraExt-row-actions">{0}</ul>',
-				res
+				output
 			)
 		}
 		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {

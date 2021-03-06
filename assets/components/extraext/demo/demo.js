@@ -257,7 +257,7 @@ demo.panel = function(config) {
 							},
 							{
 								xtype: extraExt.browser.xtype,
-								openTo:'core/',
+								openTo: 'core/',
 								canSelectFolder: true,
 								canSelectFile: true,
 							},
@@ -296,6 +296,47 @@ demo.panel = function(config) {
 										hiddenName: 'category'
 									}
 								]
+							},
+							{
+								xtype: extraExt.inputs.infinity.xtype,
+								name:'inf',
+								field: {
+									xtype: extraExt.inputs.popup.xtype,
+									prepare: function(data) {
+										if(data.test == _('yes')) {
+											data.test = 1
+										} else {
+											data.test = 0
+										}
+									},
+									dePrepare: function(data) {
+										if(data.test == 1) {
+											data.test = _('yes')
+										} else {
+											data.test = _('no')
+										}
+									},
+									fields: [
+										{
+											xtype: MODx.combo.Boolean.xtype,
+											name: 'test',
+										},
+										{
+											xtype: 'textarea',
+											name: 'description',
+										},
+										{
+											xtype: extraExt.inputs.modComboSuper.xtype,
+											action: 'element/category/getlist',
+											fields: ['id', 'name'],
+											displayField: 'name',
+											valueField: 'id',
+											name: 'category',
+											hiddenName: 'category'
+										}
+									]
+								},
+
 							},
 						]
 					}

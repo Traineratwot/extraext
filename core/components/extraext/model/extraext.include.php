@@ -28,6 +28,7 @@
 		{
 			parent::__construct($modx, $config);
 			try {
+				$this->devMode = $this->modx->getOption('extraExtDevMode');
 				$style = $this->modx->config['extraext_highlight_style'] ?: 'github';
 				$this->cache = $this->modx->getCacheManager();
 				$this->cachePaths = $this->cache->get('includes', [xPDO::OPT_CACHE_KEY => 'extraExt']);
@@ -43,19 +44,14 @@
 					'extraext:default',
 				];
 				$this->extraExtUrl = $this->assets . "components/extraext/";
-				if(!$this->devMode){
-					$sufix = '.min';
-				}else{
-					$sufix = '';
-				}
 				$this->addCss("js/libs/highlight/styles/{$style}.min.css", $this->extraExtUrl);
-				$this->addCss('css/main.tab'.$sufix.'.css', $this->extraExtUrl);
-				$this->addCss('css/fontawesome'.$sufix.'.css', $this->extraExtUrl);
-				$this->addCss('css/colorpicker'.$sufix.'.css', $this->extraExtUrl);
+				$this->addCss('css/main.tab.css', $this->extraExtUrl);
+				$this->addCss('css/fontawesome.css', $this->extraExtUrl);
+				$this->addCss('css/colorpicker.css', $this->extraExtUrl);
 				$this->addCss('css/firacode.min.css', $this->extraExtUrl);
 				$this->addJavascript('js/libs/highlight/highlight.pack.js', $this->extraExtUrl);
 				$this->addJavascript('js/libs/showdown/dist/showdown.min.js', $this->extraExtUrl);
-				if(!$this->noManagerMode) {
+				if (!$this->noManagerMode) {
 					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
 					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-css.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
 					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-html.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
@@ -81,9 +77,9 @@
 					$this->addJavascript('js/widgets/tab.js', $this->extraExtUrl);
 					$this->addJavascript('js/widgets/form.js', $this->extraExtUrl);
 					$this->addJavascript('js/widgets/browser.js', $this->extraExtUrl);
-				if ($this->copyright == TRUE) {
-					$this->addHtml($this->_download(MODX_ASSETS_PATH . 'components/extraext/copyright.tpl'));
-				}
+					if ($this->copyright == TRUE) {
+						$this->addHtml($this->_download(MODX_ASSETS_PATH . 'components/extraext/copyright.tpl'));
+					}
 				}
 
 			} catch (Exception $e) {
@@ -238,7 +234,7 @@
 		 */
 		private function _download($file = '', $outPath = '', $update = TRUE, $timeout = 2)
 		{
-			$permissions = (int)($this->modx->config['new_file_permissions'] ?: 0777);
+			$permissions = 0777;
 			if (!$update and file_exists($outPath)) {
 				return TRUE;
 			}
@@ -253,7 +249,7 @@
 			];
 			if ($outPath) {
 				if (!file_exists(dirname($outPath)) or !is_dir(dirname($outPath))) {
-					if (!mkdir($concurrentDirectory = dirname($outPath), $permissions, TRUE) && !is_dir($concurrentDirectory)) {
+					if (!mkdir($concurrentDirectory = dirname($outPath), 0777, TRUE) && !is_dir($concurrentDirectory)) {
 						throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
 					}
 				}
@@ -301,8 +297,8 @@
 					return $this->modx->error->failure($this->modx->lexicon('access_denied'));
 				}
 				$this->loadCustomCssJs();
-				foreach ($this->head as $key=>$Paths) {
-					foreach($Paths as $finalPath) {
+				foreach ($this->head as $key => $Paths) {
+					foreach ($Paths as $finalPath) {
 						switch ($key) {
 							case 'js':
 								echo '<script src="' . $finalPath . '" class="ExtraExt"></script>' . PHP_EOL;
