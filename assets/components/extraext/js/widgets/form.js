@@ -7,18 +7,21 @@ extraExt.create(
 			baseParams: {},
 			btnSubmit: true,
 			btnReset: true,
+			btnSubmitText:'submit',
 			url: MODx.config.connector_url,
 			success: function(form, action) {
+				console.log(action)
 				MODx.msg.status({
-					title: _('extraExt.' + action?.msg),
-					message: _('extraExt.html.success'),
+					title: _('extraExt.html.success'),
+					message: _(action.result.message),
 					delay: 3
 				})
 			},
 			failure: function(form, action) {
+				console.log(action)
 				MODx.msg.status({
-					title: _('extraExt.' + action?.msg),
-					message: _('extraExt.html.failure'),
+					title: _('extraExt.html.failure'),
+					message: _(action.result.message),
 					delay: 3
 				})
 			}
@@ -46,7 +49,6 @@ extraExt.create(
 			}
 			return this
 		}
-		console.debug(this, config)
 	},
 	Ext.form.FormPanel,
 	[{
@@ -76,7 +78,7 @@ extraExt.create(
 			var bbar = []
 			if(config.btnReset) {
 				bbar.push({
-					text: 'Reset',
+					text: _('reset'),
 					handler: () => {
 						this.getForm().reset()
 					}
@@ -84,10 +86,9 @@ extraExt.create(
 			}
 			if(config.btnSubmit) {
 				bbar.push({
-					text: 'Submit',
+					text: _(config.btnSubmitText),
 					formBind: true, //only enabled once the form is valid
 					handler: () => {
-						console.debug(this)
 						var form = this.getForm()
 						if(form.isValid()) {
 							form.submit({

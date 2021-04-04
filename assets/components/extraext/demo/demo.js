@@ -55,7 +55,7 @@ demo.panel = function(config) {
 											popup: true,
 										},
 										extraExtEditor: {
-											// xtype:'modx-texteditor',
+											xtype:'modx-texteditor',
 											height: '300',
 											mimeType: 'text/x-smarty',
 											enableKeyEvents: true,

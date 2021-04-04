@@ -13,6 +13,11 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 	fns = {}
 
 
+	constructor() {
+		super()
+	}
+
+
 	/**
 	 * @param {number} len
 	 */
@@ -321,33 +326,6 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 	 * @param x {int}
 	 * @param table {object}
 	 */
-	CODE(val, cell, row, y, x, table) {
-		var config = this.extraExtRenderer || {}
-		var rawValue = val
-		if(val && config.code) {
-			var out = null
-			try {
-				out = hljs.highlight(config.code, val).value
-			} catch(e) {
-				out = val
-			}
-		}
-		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
-			type: 'CODE',
-			rawValue: rawValue
-		})
-	}
-
-
-	/**
-	 * @author Traineratwot
-	 * @param val {string}
-	 * @param cell {object}
-	 * @param row {object}
-	 * @param y {int}
-	 * @param x {int}
-	 * @param table {object}
-	 */
 	JSON(val, cell, row, y, x, table) {
 		var rawValue = val
 		if(val) {
@@ -505,6 +483,103 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 	 * @param {*} x
 	 * @param {Object} table
 	 */
+	AGO(val, cell, row, y, x, table) {
+		var rawValue = val
+		var out = val
+		var id = Ext.id()
+		var extraExtRenderer = this.extraExtRenderer || {}
+		var format = 'ms'
+		if(extraExtRenderer.hasOwnProperty('format')) {
+			format = extraExtRenderer.format
+		}
+		if(["s", 'min', 'h', 'day'].indexOf(format) >= 0) {
+			var time = extraExt.util.ConverterUnits.convert(val, 'time', format, 'ms')
+			out = moment(parseInt(time[0])).calendar()
+		} else {
+			out = moment(val, format).calendar()
+		}
+console.log(val,out)
+		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
+			type: 'AGO',
+			rawValue: rawValue
+		})
+	}
+
+
+	/**
+	 * @param {*} val
+	 * @param {Object} cell
+	 * @param {Object} row
+	 * @param {*} y
+	 * @param {*} x
+	 * @param {Object} table
+	 */
+	DATE(val, cell, row, y, x, table) {
+		var rawValue = val
+		var out = val
+		var id = Ext.id()
+		var formatIN
+		var formatOUt
+		var extraExtRenderer = this.extraExtRenderer || {}
+		if(extraExtRenderer.hasOwnProperty('format')) {
+			formatIN = extraExtRenderer.formatIN
+		}
+		if(extraExtRenderer.hasOwnProperty('format')) {
+			formatOUt = extraExtRenderer.formatOUt
+		}
+
+		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
+			type: 'DATE',
+			rawValue: rawValue
+		})
+	}
+
+
+	/**
+	 * @param {*} val
+	 * @param {Object} cell
+	 * @param {Object} row
+	 * @param {*} y
+	 * @param {*} x
+	 * @param {Object} table
+	 */
+	TIME(val, cell, row, y, x, table) {
+		var rawValue = val
+		var out = val
+		var id = Ext.id()
+		var extraExtRenderer = this.extraExtRenderer || {}
+		var unit = 'ms'
+		if(extraExtRenderer.hasOwnProperty('unit')) {
+			unit = extraExtRenderer.unit
+		}
+		if(parseFloat(val)) {
+			try {
+				var time = extraExt.util.ConverterUnits.convert(val, 'time', unit)
+				if(parseFloat(time[0])) {
+					out = parseFloat(time[0]).toFixed(2) + ' ' + time[1]
+				} else {
+					out = val + ' ' + unit
+				}
+			} catch(e) {
+				out = val + ' ' + unit
+			}
+
+		}
+		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
+			type: 'TIME',
+			rawValue: rawValue
+		})
+	}
+
+
+	/**
+	 * @param {*} val
+	 * @param {Object} cell
+	 * @param {Object} row
+	 * @param {*} y
+	 * @param {*} x
+	 * @param {Object} table
+	 */
 	IMAGE(val, cell, row, y, x, table) {
 		var rawValue = val
 		var out = val
@@ -540,78 +615,69 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 		var rawValue = val
 		var out = val
 		var extraExtRenderer = this.extraExtRenderer || {}
+		var res = []
 		var cls, icon, title, action, item = '', controls = []
 		if(extraExtRenderer.hasOwnProperty('controls')) {
 			controls = extraExtRenderer.controls
-		} else if(row.data.hasOwnProperty('controls')) {
-			controls = row.data.controls
-		} else if(row.data.hasOwnProperty('actions')) {
-			controls = row.data.actions
 		} else {
-			return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
-				type: 'CONTROL',
-				rawValue: rawValue
-			})
+			controls = val
 		}
-		var output = ''
-		if(controls) {
-			for(var i in controls) {
-				if(controls.hasOwnProperty(i)) {
-					var res = []
-					var a = controls[i]
-					var icon = a['icon'] ? a['icon'] : ''
-					var type = a['type'] ? a['type'] : 'button'
-					var text = a['text'] ? a['text'] : ''
-					var cls = a['cls'] ? a['cls'] : ''
-					var action = a['action'] ? a['action'] : ''
-					var title = a['title'] ? a['title'] : ''
-					var href = a['href'] ? a['href'] : ''
-					if(icon instanceof extraExt.classes.util.icon) {
-					} else {
-						icon = new extraExt.classes.util.icon(icon)
-					}
-
-					switch( type.toLowerCase() ) {
-						case 'button':
-							item = `<li class="extraExt ${cls}"><button class="extraExt btn btn-default" action="${action}" title="${title}">${icon.render()} ${text}</button></li>`
-							break
-						case 'link':
-							item = `<li class="extraExt ${cls}"><a class="extraExt btn btn-default" href="${href}" action="${action}" title="${title}" >${icon.render()} ${text}</a></li>`
-							break
-					}
-
-					res.push(item)
-
-					var attrs = [
-						extraExt.clickGridAction + '=true',
-						`action=${action}`,
-						`data-x=${x}`,
-						`data-y=${y}`,
-					]
-					res = res.join('\n')
-					var node = new DOMParser().parseFromString(res, 'text/html')
-					node.body.querySelectorAll('li *').forEach(function(item) {
-						for(const attrsKey in attrs) {
-							if(attrs.hasOwnProperty(attrsKey)) {
-								if(typeof attrs[attrsKey] == 'string') {
-									var attr = attrs[attrsKey].split('=')
-									var name = attr[0]
-									var value = attr[1]
-									if(name && value) {
-										item.setAttribute(name, value)
-									}
-								}
-							}
-
-						}
-					})
-					output += node.body.innerHTML
+		for(var i in controls) {
+			if(controls.hasOwnProperty(i)) {
+				var a = controls[i]
+				var icon = a['icon'] ? a['icon'] : ''
+				var type = a['type'] ? a['type'] : 'button'
+				var text = a['text'] ? a['text'] : ''
+				var cls = a['cls'] ? a['cls'] : ''
+				var btnCls = a['btnCls'] ? a['btnCls'] : 'btn btn-default'
+				var action = a['action'] ? a['action'] : ''
+				var title = a['title'] ? a['title'] : ''
+				var href = a['href'] ? a['href'] : ''
+				var target = a['target'] ? a['target'] : '_self'
+				if(icon instanceof extraExt.classes.util.icon) {
+				} else {
+					icon = new extraExt.classes.util.icon(icon)
 				}
-			}
 
+				switch( type.toLowerCase() ) {
+					case 'button':
+						item = `<li class="extraExt ${cls}"><button class="extraExt ${btnCls}" action="${action}" title="${title}">${icon.render()} ${text}</button></li>`
+						break
+					case 'link':
+						item = `<li class="extraExt ${cls}"><a class="extraExt ${btnCls}" href="${href}" target="${target}" action="${action}" title="${title}" >${icon.render()} ${text}</a></li>`
+						break
+				}
+
+				res.push(item)
+
+			}
+			var attrs = [
+				extraExt.clickGridAction + '=true',
+				`action=${action}`,
+				`data-x=${x}`,
+				`data-y=${y}`,
+			]
+			res = res.join('\n')
+			var node = new DOMParser().parseFromString(res, 'text/html')
+			node.body.querySelectorAll('li *').forEach(function(item) {
+				for(const attrsKey in attrs) {
+					if(attrs.hasOwnProperty(attrsKey)) {
+						if(typeof attrs[attrsKey] == 'string') {
+							var attr = attrs[attrsKey].split('=')
+							var name = attr[0]
+							var value = attr[1]
+							if(name && value) {
+								item.setAttribute(name, value)
+							}
+						}
+					}
+
+				}
+			})
+			res = node.body.innerHTML
 			return String.format(
 				'<ul class="extraExt extraExt-row-actions">{0}</ul>',
-				output
+				res
 			)
 		}
 		return extraExt.grid.renderers.default.call(this, out || val, cell, row, y, x, table, {
@@ -619,6 +685,7 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
 			rawValue: rawValue
 		})
 	}
+
 }
 /**
  * @author Traineratwot
@@ -638,7 +705,3 @@ extraExt.classes.grid.renderers = class extends extraExt.classes.util.renderers 
  * @see CONTROL
  */
 extraExt.grid.renderers = new extraExt.classes.grid.renderers()
-
-
-
-

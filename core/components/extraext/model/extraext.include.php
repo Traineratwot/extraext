@@ -28,42 +28,47 @@
 		{
 			parent::__construct($modx, $config);
 			try {
-				$this->devMode = $this->modx->getOption('extraExtDevMode');
 				$style = $this->modx->config['extraext_highlight_style'] ?: 'github';
 				$this->cache = $this->modx->getCacheManager();
 				$this->cachePaths = $this->cache->get('includes', [xPDO::OPT_CACHE_KEY => 'extraExt']);
 				$this->cachePathsGet = TRUE;
 				$this->assets = rtrim($modx->getOption('assets_url', NULL, '/assets'), '/') . '/';
 				$this->copyright = (bool)$modx->getOption('extraext_copyright', NULL, TRUE);
-				if (!$this->componentName) {
-					$this->componentName = $_GET['namespace'];
-				}
+				$this->componentName = $_GET['namespace'];
 				$this->componentUrl = $this->assets . "components/{$this->componentName}/";
 				$this->connectorUrl = $this->assets . "components/{$this->componentName}/connector.php";
 				$this->languageTopics = [
 					'extraext:default',
 				];
 				$this->extraExtUrl = $this->assets . "components/extraext/";
+				if(!$this->devMode){
+					$sufix = '.min';
+				}else{
+					$sufix = '';
+				}
 				$this->addCss("js/libs/highlight/styles/{$style}.min.css", $this->extraExtUrl);
-				$this->addCss('css/main.tab.css', $this->extraExtUrl);
-				$this->addCss('css/fontawesome.css', $this->extraExtUrl);
-				$this->addCss('css/colorpicker.css', $this->extraExtUrl);
+				$this->addCss('css/main.tab'.$sufix.'.css', $this->extraExtUrl);
+				$this->addCss('css/fontawesome'.$sufix.'.css', $this->extraExtUrl);
+				$this->addCss('css/colorpicker'.$sufix.'.css', $this->extraExtUrl);
 				$this->addCss('css/firacode.min.css', $this->extraExtUrl);
 				$this->addJavascript('js/libs/highlight/highlight.pack.js', $this->extraExtUrl);
 				$this->addJavascript('js/libs/showdown/dist/showdown.min.js', $this->extraExtUrl);
-				if (!$this->noManagerMode) {
+				$this->addJavascript('js/libs/moment/moment-with-locales.min.js', $this->extraExtUrl);
+				if(!$this->noManagerMode) {
 					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
 					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-css.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
 					$this->addJavascript('ajax/libs/js-beautify/1.13.0/beautify-html.min.js', 'https://cdnjs.cloudflare.com/', TRUE);
 					$devMode = (int)$this->devMode;
 					$this->addHtml("<script type='text/javascript' class='extraExt-constants'>
 					const assetsUrl = `{$this->assets}`
+					const manager_language = `{$this->modx->getOption('manager_language')}`
 					const {$this->componentName}ConnectorUrl = `{$this->connectorUrl}`
 					const {$this->componentName}AssetsUrl = `{$this->componentUrl}`
 					const extraExtUrl = `{$this->extraExtUrl}`
 					const componentName = `{$this->componentName}` 
 					const devMode = `{$devMode}`== '0'?false:true
 					const ExtraHead = JSON.parse(`" . json_encode($this->ExtraHead) . "`)
+					moment.locale(manager_language)
 				</script>");
 					$this->addJavascript('js/main.js', $this->extraExtUrl);
 					$this->addJavascript('js/util.js', $this->extraExtUrl);
@@ -85,6 +90,29 @@
 			} catch (Exception $e) {
 				$this->modx->log(modX::LOG_LEVEL_ERROR, $e->getMessage(), '', __METHOD__ ?: __FUNCTION__, __FILE__, __LINE__);
 			}
+		}
+
+		public function setFavicon($favicon){
+			$h = <<<HTML
+<script>
+try {
+	function changeFavicon(favicon){
+		var link = document.querySelector("link[rel~='icon']");
+		if (!link) {
+		    link = document.createElement('link');
+		    link.rel = 'shortcut icon';
+		    document.getElementsByTagName('head')[0].appendChild(link);
+		}
+		link.href = favicon; 
+	}
+	changeFavicon('{$favicon}')
+}catch(e) {
+	console.warn('can`t change favicon', e)
+}
+</script>
+HTML;
+			$this->addHtml($h);
+
 		}
 
 		public function prepareLanguage()
@@ -234,7 +262,7 @@
 		 */
 		private function _download($file = '', $outPath = '', $update = TRUE, $timeout = 2)
 		{
-			$permissions = 0777;
+			$permissions = (int)($this->modx->config['new_file_permissions'] ?: 0777);
 			if (!$update and file_exists($outPath)) {
 				return TRUE;
 			}
@@ -249,7 +277,7 @@
 			];
 			if ($outPath) {
 				if (!file_exists(dirname($outPath)) or !is_dir(dirname($outPath))) {
-					if (!mkdir($concurrentDirectory = dirname($outPath), 0777, TRUE) && !is_dir($concurrentDirectory)) {
+					if (!mkdir($concurrentDirectory = dirname($outPath), $permissions, TRUE) && !is_dir($concurrentDirectory)) {
 						throw new \RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
 					}
 				}
@@ -297,8 +325,8 @@
 					return $this->modx->error->failure($this->modx->lexicon('access_denied'));
 				}
 				$this->loadCustomCssJs();
-				foreach ($this->head as $key => $Paths) {
-					foreach ($Paths as $finalPath) {
+				foreach ($this->head as $key=>$Paths) {
+					foreach($Paths as $finalPath) {
 						switch ($key) {
 							case 'js':
 								echo '<script src="' . $finalPath . '" class="ExtraExt"></script>' . PHP_EOL;

@@ -203,12 +203,10 @@ extraExt.create(
 		config.tbar = this.getTopBar.call(this, config)
 		config.bbar = this.getBotBar.call(this, config)
 		if(config.hasOwnProperty('baseParams')) {
-			delete config.baseParams
+			config.baseParams.action = config.action
 		}
-
 		extraExt.xTypes[extraExt.grid.xtype].superclass.constructor.call(this, config) // Магия
 
-		Object.assign(this.getStore().baseParams, config.base_params)
 		//validator
 		if(this.extraExtSearch) {
 			requireConfigField.push('searchKey')
