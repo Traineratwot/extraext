@@ -68,6 +68,9 @@ var extraExt = {
 		search: {
 			xtype: 'extraExt-search'
 		},
+		date: {
+			xtype: 'extraExt-date'
+		},
 	},
 	tabs: {
 		xtype: 'extraExt-tabs'

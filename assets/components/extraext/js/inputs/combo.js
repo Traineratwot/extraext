@@ -14,7 +14,7 @@ Ext.extend(extraExt.inputs.Submit, Ext.form.Action.Submit, {
 				}
 				a.each(b)
 			}
-
+			
 			var params = this.form.baseParams
 			params.data = Ext.util.JSON.encode(this.form.getValues())
 			Ext.Ajax.request(Ext.apply(this.createCallback(e), {
@@ -65,7 +65,7 @@ extraExt.create(
 		config.baseParams = Object.assign({
 			action: config.action
 		}, config.baseParams)
-
+		
 		config.store = new Ext.data.JsonStore({
 			id: (config.name || Ext.id()) + '-store'
 			, root: 'results'
@@ -84,7 +84,7 @@ extraExt.create(
 			} else {
 				errorConfig.push(key)
 			}
-
+			
 		}
 		if(errorConfig.length > 0) {
 			console.error(`ExtraExt: invalid require config [${this.xtype || config.xtype}]`, errorConfig)
@@ -154,7 +154,7 @@ extraExt.create(
 		if(config.hasOwnProperty('table') && config.table.hasOwnProperty('requestDataType')) {
 			config.requestDataType = config.table.requestDataType
 		}
-
+		
 		if(config.hasOwnProperty('requestDataType') && config.requestDataType == 'json') {
 			config.hiddenName = config.name
 		} else {
@@ -240,12 +240,12 @@ extraExt.create(
 		config.value = this.valuePrepare(config.value)
 		extraExt.xTypes[extraExt.inputs.search.xtype].superclass.constructor.call(this, config)
 		this.fieldsPrepare()
-
+		
 	},
 	Ext.form.TriggerField,
 	[
 		{
-
+			
 			fieldsPrepare: function() {
 				for(const fieldsKey in this.fields) {
 					var field = this.fields[fieldsKey]
@@ -333,7 +333,7 @@ extraExt.create(
 				} catch(e) {
 					this.setValue('')
 				}
-
+				
 				return this.field || []
 			},
 			triggerClass: 'far fa-pen-square',
@@ -365,6 +365,38 @@ extraExt.create(
 			},
 			onDestroy: function() {
 				extraExt.xTypes[extraExt.inputs.infinity.xtype].superclass.onDestroy.call(this)
+			}
+		}
+	]
+)
+
+extraExt.create(
+	extraExt.inputs.date.xtype,
+	function(config) {
+		config = config || {}
+		Ext.applyIf(config, {})
+		extraExt.xTypes[extraExt.inputs.date.xtype].superclass.constructor.call(this, config)
+	},
+	Ext.form.DateField,
+	[
+		{
+			onTriggerClick: function() {
+				Ext.form.DateField.prototype.onTriggerClick.apply(this, arguments)
+				if(!this.hasOwnProperty('btnClear')) {
+					var self = this
+					this.btnClear = new Ext.Button({
+						text: _('reset'),
+						listeners: {
+							click: function() {
+								self.reset()
+								self.menu.hide()
+								self.fireEvent('select')
+							}
+						}
+						
+					})
+					this.btnClear.render(this.menu.picker.todayBtn.container)
+				}
 			}
 		}
 	]

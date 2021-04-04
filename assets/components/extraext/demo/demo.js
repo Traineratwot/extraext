@@ -338,6 +338,10 @@ demo.panel = function(config) {
 								},
 
 							},
+							{
+								xtype: extraExt.inputs.date.xtype,
+								name:'date',
+							},
 						]
 					}
 				]
